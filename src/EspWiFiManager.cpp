@@ -20,6 +20,11 @@ void EspWiFiManager::setconsole(EspConsole *pconsole)
     console = pconsole;
 }
 
+int EspWiFiManager::getbestChannel()
+{
+    return bestChannel;
+}
+
 void EspWiFiManager::setup()
 {
     if (config == NULL)

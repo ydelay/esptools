@@ -19,6 +19,7 @@ private:
   bool STAconnected = false;
   bool APconnected = false;
   WiFiMode_t mode = WIFI_OFF;
+  int bestChannel = 0;
   
   int choisirCanal();
   
@@ -41,6 +42,7 @@ public:
 
   void setconfig(EspConfigManager *pconfigManager);
   void setconsole(EspConsole *pconsole);
+  int getbestChannel();
 
   void setup();
 
