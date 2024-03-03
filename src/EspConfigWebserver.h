@@ -80,7 +80,13 @@ public:
 
     void Setup();
     void SetConsole(EspConsole *console);
+    #ifdef ESP8266
     void SetWifi(ESP8266WiFiClass *wifi);
+    #endif
+    #ifdef ESP32
+    void SetWifi(WiFiClass *wifi);
+    #endif
+    
     void SetConfig(EspConfigManager *config);
 
 
