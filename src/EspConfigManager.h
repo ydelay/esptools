@@ -7,7 +7,7 @@
 #include <EEPROM.h>
 #include <string>
 #include <EspConsole.h>
-// #include <global.h>
+
 
 // Définition des structures de données de configuration --------------------------------------------
 

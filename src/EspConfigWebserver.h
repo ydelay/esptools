@@ -3,8 +3,16 @@
 #include <Arduino.h>
 #include <EspConfigManager.h>
 #include <EspConsole.h>
-#include <ESP8266WebServer.h>
-#include <ESP8266WiFi.h>
+#ifdef ESP8266
+    #include <ESP8266WebServer.h>
+    #include <ESP8266WiFi.h>
+#elif defined(ESP32)
+    #include <WebServer.h>
+    #include <WiFi.h>
+else
+    #error "Ni ESP32 ni ESP8266 n'est défini"
+#endif
+
 #include <string>
 #include <EspConfigPagehtml.h>
 

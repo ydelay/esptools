@@ -1,5 +1,12 @@
 #include <Stream.h>
+#ifdef ESP32
+    #include <WebServer.h>
+    #include <WiFi.h>
+#elif defined(ESP8266)
 #include <ESP8266WiFi.h>
+#else
+    #error "Ni ESP32 ni ESP8266 n'est défini"
+#endif
 #include <TelnetStream.h>
 #include <Print.h>
 #include <EspConsole.h>
