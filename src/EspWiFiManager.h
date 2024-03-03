@@ -1,6 +1,12 @@
 #ifndef ESPWIFIMANAGER_H
 #define ESPWIFIMANAGER_H
-#include <ESP8266WifI.h>
+#ifdef ESP8266
+  #include <ESP8266WifI.h>
+#elif defined(ESP32)
+  #include <WiFi.h>
+#else
+  #error "Ni ESP32 ni ESP8266 n'est défini"
+#endif
 #include <EspConsole.h>
 #include <EspConfigManager.h>
 
