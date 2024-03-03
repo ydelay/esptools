@@ -41,10 +41,18 @@ void EspConfigWebserver::SetConsole(EspConsole *console)
     this->console = console;
 }
 
-void EspConfigWebserver::SetWifi(ESP8266WiFiClass *wifi)
-{
-    espWiFi = wifi;
-}
+#ifdef ESP32
+    void EspConfigWebserver::SetWifi(WiFiClass *wifi)
+    {
+        espWiFi = wifi;
+    }
+#elif defined(ESP8266)
+    void EspConfigWebserver::SetWifi(ESP8266WiFiClass *wifi)
+    {
+        espWiFi = wifi;
+    }
+#endif
+
 void EspConfigWebserver::SetConfig(EspConfigManager *config)
 {
     espConfig = config;
