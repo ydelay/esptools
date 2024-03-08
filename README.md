@@ -99,13 +99,14 @@ Méthode à appeler dans la fonction setup()
  EspConfigWebserver::SetConsole(EspConsole *console)
  EspConfigWebserver::SetWifi(ESP8266WiFiClass *wifi)
  EspConfigWebserver::SetConfig(EspConfigManager *config)
+ EspConfigWebserver::begin()
  
 ```
 
 Méthode à appeler dans la fonction loop()
 
 ```
- EspConfigWebserver::begin()
+
  EspConfigWebserver::handleClient()
  EspConfigWebserver::stop()
  

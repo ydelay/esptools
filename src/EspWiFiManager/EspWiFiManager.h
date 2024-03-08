@@ -1,7 +1,7 @@
 #ifndef ESPWIFIMANAGER_H
 #define ESPWIFIMANAGER_H
 #ifdef ESP8266
-  #include <ESP8266WifI.h>
+  #include <ESP8266WiFi.h>
 #elif defined(ESP32)
   #include <WiFi.h>
 #else

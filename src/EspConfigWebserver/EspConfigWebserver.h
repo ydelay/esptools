@@ -24,6 +24,8 @@ private:
 
     enum topic {Device,MQTT,WiFi};
     enum subtopic {Info,Scan,Config,Detail,Web};
+    boolean _debug = false;
+    boolean _espconsoleactive = false;
 
 #ifdef ESP32
     WiFiClass *espWiFi;
@@ -33,7 +35,7 @@ private:
     ESP8266WebServer espWebserver;
 #endif
     EspConfigManager *espConfig;
-    EspConsole *console;
+    EspConsole *_espconsole;
     // char *webserveruser = "admin";
     // char *webserverpassword = "pwd4admin";
 
@@ -86,6 +88,7 @@ public:
 
     void Setup();
     void SetConsole(EspConsole *console);
+    void SetDebug(boolean debug);
     #ifdef ESP8266
     void SetWifi(ESP8266WiFiClass *wifi);
     #endif
