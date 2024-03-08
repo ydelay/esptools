@@ -913,13 +913,13 @@ String EspConfigWebserver::Construire_wifiscanhtml() // OK adapted
             lrssi = lrssi + "dB";
             lchannel = std::to_string(channel);
         #elif defined(ESP32)
-            ssid = WiFi.SSID(i);
-            encryptionType = WiFi.encryptionType(i);
-            RSSI = WiFi.RSSI(i);
-            BSSID = WiFi.BSSIDstr(i);
-            channel = WiFi.channel(i);
-            lrssi = String(RSSI) + "dB";
-            lchannel = String(channel);
+            ssid = espWiFi->SSID(i);
+            encryptionType = espWiFi->encryptionType(i);
+            RSSI = espWiFi->RSSI(i);
+            BSSID = espWiFi->BSSID(i);
+            channel = espWiFi->channel(i);
+            lrssi = String(String(RSSI) + "dB").c_str();
+            lchannel = String(channel).c_str();
         #endif
             
         // ENC_TYPE_WEP  = 5,
@@ -934,28 +934,63 @@ String EspConfigWebserver::Construire_wifiscanhtml() // OK adapted
         wifiscanrows.replace("<!--%RSSI%-->", lrssi.c_str());
         wifiscanrows.replace("<!--%BSSID%-->", espWiFi->BSSIDstr(i).c_str());
         wifiscanrows.replace("<!--%CHANNEL%-->",lchannel.c_str());
-        
-        switch (encryptionType)
-        {
-        case ENC_TYPE_WEP:
-            wifiscanrows.replace("<!--%ENCRYPT%-->", "WEP");
-            break;
-        case ENC_TYPE_TKIP:
-            wifiscanrows.replace("<!--%ENCRYPT%-->", "TKIP");
-            break;
-        case ENC_TYPE_CCMP: 
-            wifiscanrows.replace("<!--%ENCRYPT%-->", "WPA2-CCMP");
-            break;
-        case ENC_TYPE_NONE:
-            wifiscanrows.replace("<!--%ENCRYPT%-->", "NONE");
-            break;
-        case ENC_TYPE_AUTO: 
-            wifiscanrows.replace("<!--%ENCRYPT%-->", "AUTO");
-            break;
-        default:    
-            wifiscanrows.replace("<!--%ENCRYPT%-->", "UNKNOWN");
-            break;
-        }
+        #ifdef ESP32
+            switch (encryptionType)
+            {
+            case WIFI_AUTH_WEP:
+                wifiscanrows.replace("<!--%ENCRYPT%-->", "WEP");
+                break;
+            case WIFI_AUTH_WPA_PSK:
+                wifiscanrows.replace("<!--%ENCRYPT%-->", "WPA/PSK");
+                break;
+            case WIFI_AUTH_WPA2_PSK: 
+                wifiscanrows.replace("<!--%ENCRYPT%-->", "WPA2/PSK");
+                break;
+            case WIFI_AUTH_OPEN:
+                wifiscanrows.replace("<!--%ENCRYPT%-->", "NONE");
+                break;
+            case WIFI_AUTH_WPA_WPA2_PSK: 
+                wifiscanrows.replace("<!--%ENCRYPT%-->", "WEPA/WPA2/PSK");
+                break;
+            case WIFI_AUTH_WPA2_ENTERPRISE: 
+                wifiscanrows.replace("<!--%ENCRYPT%-->", "WPA2/EAS");
+                break;
+            case WIFI_AUTH_WPA3_PSK: 
+                wifiscanrows.replace("<!--%ENCRYPT%-->", "WPA3/PSK");
+                break;
+            case WIFI_AUTH_WPA2_WPA3_PSK: 
+                wifiscanrows.replace("<!--%ENCRYPT%-->", "WPA2/WPA3/PSK");
+                break;
+            case WIFI_AUTH_WAPI_PSK:
+                wifiscanrows.replace("<!--%ENCRYPT%-->", "WAPI/PSK");
+                break;
+            default:    
+                wifiscanrows.replace("<!--%ENCRYPT%-->", "UNKNOWN");
+                break;
+            }
+        #elif defined(ESP8266)
+            switch (encryptionType)
+            {
+            case ENC_TYPE_WEP:
+                wifiscanrows.replace("<!--%ENCRYPT%-->", "WEP");
+                break;
+            case ENC_TYPE_TKIP:
+                wifiscanrows.replace("<!--%ENCRYPT%-->", "TKIP");
+                break;
+            case ENC_TYPE_CCMP: 
+                wifiscanrows.replace("<!--%ENCRYPT%-->", "WPA2-CCMP");
+                break;
+            case ENC_TYPE_NONE:
+                wifiscanrows.replace("<!--%ENCRYPT%-->", "NONE");
+                break;
+            case ENC_TYPE_AUTO: 
+                wifiscanrows.replace("<!--%ENCRYPT%-->", "AUTO");
+                break;
+            default:    
+                wifiscanrows.replace("<!--%ENCRYPT%-->", "UNKNOWN");
+                break;
+            }
+        #endif
             
 
     }
