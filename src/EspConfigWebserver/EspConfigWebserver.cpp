@@ -664,25 +664,43 @@ String EspConfigWebserver::Construire_deviceheader(subtopic wifitopic)
 // <!--%OTAPASSWORD%-->       : Config.getOTAPassword()
 
 String EspConfigWebserver::Construire_deviceinfohtml(){   
-    uint16_t vcc = ESP.getVcc();
-    float fvcc = vcc / 1024;
-    String strvcc = String(fvcc, 2);
+    #ifdef ESP8266
+        uint16_t vcc = ESP.getVcc();
+        float fvcc = vcc / 1024;
+        String strvcc = String(fvcc, 2);
+    #elif defined(ESP32)
+        String strvcc = "N/A";
+    #endif
     String page  = Construire_header(topic::Device);
     page += Construire_deviceheader(subtopic::Info);
     page += String(reinterpret_cast<const __FlashStringHelper *>(device_info_html));
     page.replace("<!--%DEVICENAME%-->", espConfig->getDeviceName().c_str());
-    page.replace("<!--%DEVICEID%-->", String(ESP.getChipId()).c_str());
+    #ifdef ESP8266
+        page.replace("<!--%DEVICEID%-->", String(ESP.getChipId()).c_str());
+    #elif defined(ESP32)
+        page.replace("<!--%DEVICEID%-->", "N/A");
+    #endif
     page.replace("<!--%DEVICELOCATION%-->", espConfig->getDeviceLocation().c_str());
     page.replace("<!--%DEVICEDESCRIPTION%-->", espConfig->getDeviceDescription().c_str());
     page.replace("<!--%DEVICEVCC%-->", strvcc);
-    page.replace("<!--%DEVICELASTRESET%-->", ESP.getResetReason().c_str());
+    #ifdef ESP8266
+        page.replace("<!--%DEVICELASTRESET%-->", ESP.getResetReason().c_str());
+    #elif defined(ESP32)
+        page.replace("<!--%DEVICELASTRESET%-->", "N/A");
+    #endif
     page.replace("<!--%WEBUSER%-->", espConfig->getWEBUser().c_str());
     page.replace("<!--%WEBPASSWORD%-->", espConfig->getWEBPassword().c_str());
     page.replace("<!--%WEBPORT%-->", String(espConfig->getWEBPort()));
     page.replace("<!--%WEBSTATUS%-->",  "Running");
-    page.replace("<!--%COREVERSION%-->", ESP.getCoreVersion().c_str());
-    page.replace("<!--%SDKVERSION%-->", String(ESP.getSdkVersion()));
-    page.replace("<!--%FLASHSTATUS%-->", ESP.checkFlashCRC() ? "OK" : "KO");
+    #ifdef ESP8266
+        page.replace("<!--%COREVERSION%-->", ESP.getCoreVersion().c_str());
+        page.replace("<!--%SDKVERSION%-->", String(ESP.getSdkVersion()));
+        page.replace("<!--%FLASHSTATUS%-->", ESP.checkFlashCRC() ? "OK" : "KO");
+    #elif defined(ESP32)
+        page.replace("<!--%COREVERSION%-->", "N/A");
+        page.replace("<!--%SDKVERSION%-->", "N/A");
+        page.replace("<!--%FLASHSTATUS%-->", "N/A");
+    #endif
     page.replace("<!--%OTAACTIVATED%-->", espConfig->getOTAEnable() ? "Activated" : "Deactivated");
     page.replace("<!--%OTAPASSWORD%-->", espConfig->getOTAPassword().c_str());
     page.replace("<!--%OTAPORT%-->", String(espConfig->getOTAPort()));
@@ -706,17 +724,29 @@ String EspConfigWebserver::Construire_devicedetailhtml()
     String page = Construire_header(topic::Device);
     page += Construire_deviceheader(subtopic::Detail);
     page += String(reinterpret_cast<const __FlashStringHelper *>(device_detail_html));
-    page.replace("<!--%FREEHEAP%-->", String(ESP.getFreeHeap()));
-    page.replace("<!--%HEAPFRAGMENTATION%-->", String(ESP.getHeapFragmentation()));
-    page.replace("<!--%HEAPMAXFREEBLOCK%-->", String(ESP.getMaxFreeBlockSize()));
-    page.replace("<!--%FLASHCHIPID%-->", String(ESP.getFlashChipId()));
-    page.replace("<!--%FLASHCHIPSIZE%-->", String(ESP.getFlashChipSize()));
-    page.replace("<!--%FLASHREALSIZE%-->", String(ESP.getFlashChipRealSize()));
-    page.replace("<!--%FLASHCIPSPEED%-->", String(ESP.getFlashChipSpeed()));
-    page.replace("<!--%SKETCHSIZE%-->", String(ESP.getSketchSize()));
-    page.replace("<!--%SKETCHFREESPACE%-->", String(ESP.getFreeSketchSpace()));
-    page.replace("<!--%SKETCHMD5%-->", ESP.getSketchMD5().c_str());
-    page += Construire_footer();
+    #ifdef ESP8266
+        page.replace("<!--%FREEHEAP%-->", String(ESP.getFreeHeap()));
+        page.replace("<!--%HEAPFRAGMENTATION%-->", String(ESP.getHeapFragmentation()));
+        page.replace("<!--%HEAPMAXFREEBLOCK%-->", String(ESP.getMaxFreeBlockSize()));
+        page.replace("<!--%FLASHCHIPID%-->", String(ESP.getFlashChipId()));
+        page.replace("<!--%FLASHCHIPSIZE%-->", String(ESP.getFlashChipSize()));
+        page.replace("<!--%FLASHREALSIZE%-->", String(ESP.getFlashChipRealSize()));
+        page.replace("<!--%FLASHCIPSPEED%-->", String(ESP.getFlashChipSpeed()));
+        page.replace("<!--%SKETCHSIZE%-->", String(ESP.getSketchSize()));
+        page.replace("<!--%SKETCHFREESPACE%-->", String(ESP.getFreeSketchSpace()));
+        page.replace("<!--%SKETCHMD5%-->", ESP.getSketchMD5().c_str());
+    #elif defined(ESP32)
+        page.replace("<!--%FREEHEAP%-->", "N/A");
+        page.replace("<!--%HEAPFRAGMENTATION%-->", "N/A");
+        page.replace("<!--%HEAPMAXFREEBLOCK%-->", "N/A");
+        page.replace("<!--%FLASHCHIPID%-->", "N/A");
+        page.replace("<!--%FLASHCHIPSIZE%-->", "N/A");
+        page.replace("<!--%FLASHREALSIZE%-->", "N/A");
+        page.replace("<!--%FLASHCIPSPEED%-->", "N/A");
+        page.replace("<!--%SKETCHSIZE%-->", "N/A");
+        page.replace("<!--%SKETCHFREESPACE%-->", "N/A");
+        page.replace("<!--%SKETCHMD5%-->", "N/A");
+    #endif
     return page;
 }
 
@@ -876,13 +906,21 @@ String EspConfigWebserver::Construire_wifiscanhtml() // OK adapted
 
     for (int i = 0; i < nb_network; i++)
     {
-        
         wifiscanrows += wifiscanonerow;
-        espWiFi->getNetworkInfo(i, ssid, encryptionType, RSSI, BSSID, channel, isHidden);
-        lrssi = std::to_string(RSSI);
-        lrssi = lrssi + "dB";
-        lchannel = std::to_string(channel);
-
+        #ifdef ESP8266
+            espWiFi->getNetworkInfo(i, ssid, encryptionType, RSSI, BSSID, channel, isHidden);
+            lrssi = std::to_string(RSSI);
+            lrssi = lrssi + "dB";
+            lchannel = std::to_string(channel);
+        #elif defined(ESP32)
+            ssid = WiFi.SSID(i);
+            encryptionType = WiFi.encryptionType(i);
+            RSSI = WiFi.RSSI(i);
+            BSSID = WiFi.BSSIDstr(i);
+            channel = WiFi.channel(i);
+            lrssi = String(RSSI) + "dB";
+            lchannel = String(channel);
+        #endif
             
         // ENC_TYPE_WEP  = 5,
         // ENC_TYPE_TKIP = 2,

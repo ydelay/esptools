@@ -236,7 +236,7 @@ int EspWiFiManager::choisirCanal()
     }
     console->print("Canal choisi: ");
     console->println(minRssiChannel);
-    
+    bestChannel = minRssiChannel;
     return minRssiChannel;
 
 }
