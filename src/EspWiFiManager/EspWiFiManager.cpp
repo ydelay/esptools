@@ -17,7 +17,8 @@ void EspWiFiManager::setconfig(EspConfigManager *pconfigManager)
 
 void EspWiFiManager::setconsole(EspConsole *pconsole)
 {
-    console = pconsole;
+    _espconsole = pconsole;
+    _espconsoleactive = true;
 }
 
 int EspWiFiManager::getbestChannel()
@@ -29,12 +30,12 @@ void EspWiFiManager::setup()
 {
     if (config == NULL)
     {
-        console->println("Error: EspWiFiManager::setup() called without a valid EspConfigManager object");
+        _debug & _espconsoleactive ? _espconsole->println("Error: EspWiFiManager::setup() called without a valid EspConfigManager object"):0;
         return;
     }
     if (config->getAccesspointWiFiToActivate() and config->getClientWiFiToActivate())
     {
-        console->println("Both Access Point and Station WiFi are activated.");
+        _debug & _espconsoleactive ? _espconsole->println("Both Access Point and Station WiFi are activated."):0;
         mode = WIFI_AP_STA;
         setupAccessPoint();
         setupStation();
@@ -42,19 +43,19 @@ void EspWiFiManager::setup()
 
     else if (config->getAccesspointWiFiToActivate())
     {
-        console->println("Access Point WiFi is activated.");
+        _debug & _espconsoleactive ? _espconsole->println("Access Point WiFi is activated."):0;
         mode = WIFI_AP;
         setupAccessPoint();
     }
     else if (config->getClientWiFiToActivate())
     {
-        console->println("Station WiFi is activated.");
+        _debug & _espconsoleactive ? _espconsole->println("Station WiFi is activated."):0;
         mode = WIFI_STA;
         setupStation();
     }
     else
     {
-        console->println("No WiFi is activated.");
+        _debug & _espconsoleactive ? _espconsole->println("No WiFi is activated."):0;
         mode = WIFI_OFF;
     }
 }
@@ -62,7 +63,7 @@ void EspWiFiManager::setupAccessPoint()
 {
     if (config == NULL)
     {
-        console->println("Error: EspWiFiManager::setupAccessPoint() called without a valid EspConfigManager object");
+        _debug & _espconsoleactive ? _espconsole->println("Error: EspWiFiManager::setupAccessPoint() called without a valid EspConfigManager object"):0;
         return;
     }
 
@@ -84,7 +85,7 @@ void EspWiFiManager::setupStation()
 
     if (config == NULL)
     {
-        console->println("Error: EspWiFiManager::setupStation() called without a valid EspConfigManager object");
+        _debug & _espconsoleactive ? _espconsole->println("Error: EspWiFiManager::setupStation() called without a valid EspConfigManager object"):0;
         return;
     }
 
@@ -187,7 +188,7 @@ int EspWiFiManager::choisirCanal()
     }
 
     // Calculer le RSSI moyen pour chaque canal et ses canaux adjacents
-    console->println("RSSI moyen par canal:");
+    _debug & _espconsoleactive ? _espconsole->println("RSSI moyen par canal:"):0;
     for (int i = 1; i <= MAX_CHANNELS; ++i)
     {
         if (i == 1)
@@ -202,10 +203,10 @@ int EspWiFiManager::choisirCanal()
         {
             avgRssiPerChannel[i] = (rssiPerChannel[i - 1] + rssiPerChannel[i] + rssiPerChannel[i + 1]) / 3;
         }
-        console->print("Channel ");
-        console->print(i);
-        console->print(" RSSI: ");
-        console->println(avgRssiPerChannel[i]);        
+        _debug & _espconsoleactive ? _espconsole->print("Channel "):0;
+        _debug & _espconsoleactive ? _espconsole->print(i):0;
+        _debug & _espconsoleactive ? _espconsole->print(" RSSI: "):0;
+        _debug & _espconsoleactive ? _espconsole->println(avgRssiPerChannel[i]):0;        
     }
 
     // Trouver le canal avec le RSSI moyen le plus bas
@@ -234,8 +235,8 @@ int EspWiFiManager::choisirCanal()
         WiFi.softAP(config->getAccesspointWiFiSSID().c_str(), config->getAccesspointWiFiPassword().c_str(), minRssiChannel);
         delay(100);
     }
-    console->print("Canal choisi: ");
-    console->println(minRssiChannel);
+    _debug & _espconsoleactive ? _espconsole->print("Canal choisi: "):0;
+    _debug & _espconsoleactive ? _espconsole->println(minRssiChannel):0;
     bestChannel = minRssiChannel;
     return minRssiChannel;
 

@@ -14,7 +14,9 @@ class EspWiFiManager
 {
 private:
   EspConfigManager *config;
-  EspConsole *console;
+  EspConsole *_espconsole;
+  boolean _debug = false;
+  boolean _espconsoleactive = false;
 
   bool STAconnected = false;
   bool APconnected = false;
