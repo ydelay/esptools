@@ -6,12 +6,18 @@
 #include <EspWiFiManager.h>
 #include <EspConfigWebserver.h>
 
-#define debug true
+#ifdef DEBUG
+  #define DEBUGSERIAL(x) (debug ? Serial.println(x) : 0)
+  #define debug true
+#else
+  #define DEBUGSERIAL(x)
+#endif
 
 
-  EspConfigManager *espConfig;
-  EspWiFiManager *espWiFi;
-  EspConfigWebserver *espWebserver;
+EspConfigManager *espConfig;
+EspWiFiManager *espWiFi;
+EspConfigWebserver *espWebserver;
+boolean Configloaded = false;
 // ------- Fonction Setup du programme -------------------------------------------------------------
 
 void setup()
@@ -22,7 +28,7 @@ void setup()
   Serial.println("Initialisation de EspConfigManager");
   espConfig = new EspConfigManager();
 
-  if(!espConfig->load()) 
+  if (!espConfig->load())
   {
     Serial.println("Initialisation de l'EEPROM dans 10 secondes");
     delay(10000);
@@ -58,14 +64,17 @@ void setup()
   }
 
   Serial.println("Configuration du WiFi");
+  Serial.println("Création de l'object EspWiFiManager");
   espWiFi = new EspWiFiManager(espConfig);
+  Serial.println("Appel de : espWiFi->setconfig(espConfig);");
   espWiFi->setconfig(espConfig);
-  espWiFi->setconsole(NULL);
+  Serial.println("Appel de : espWiFi->setup();");
   espWiFi->setup();
+  Serial.println("Appel de : espWiFi->begin();");
   espWiFi->begin();
   Serial.print("Connexion au WiFi en cours");
   delay(1000);
-  
+
   while (!espWiFi->isConnected())
   {
     Serial.print(".");
@@ -75,6 +84,7 @@ void setup()
   delay(5000);
 
   Serial.println("Configuration du serveur WEB");
+  Serial.println("Initialisation du serveur WEB");
   espWebserver = new EspConfigWebserver();
   espWebserver->Setup();
   espWebserver->SetWifi(&WiFi);
@@ -82,7 +92,6 @@ void setup()
   espWebserver->begin();
 
   Serial.println("Fin de setup");
-
 }
 
 // ------- Fonction Loop du programme --------------------------------------------------------------
@@ -91,7 +100,7 @@ void loop()
 {
   // put your main code here, to run repeatedly:
   // put your main code here, to run repeatedly:
-  boolean Configloaded = false;
+
   if (!Configloaded)
   {
     Serial.println("Chargement de la structure de puis l'EEPROM");
@@ -127,12 +136,8 @@ void loop()
       Serial.println("Erreur de chargement de la structure depuis l'EEPROM");
     }
 
-     espWebserver->handleClient();
+    espWebserver->handleClient();
   }
 }
 
 // ------- Core des fonctions déclarées  -----------------------------------------------------------
-
-
-
-
