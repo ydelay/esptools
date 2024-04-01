@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?><uml:Model xmlns:uml="http://schema.omg.org/spec/UML/2.2" xmlns:xmi="http://schema.omg.org/spec/XMI/2.1" xmi:version="2.1" xmi:id="_PER8oOcIEe6kSKfXD06Ujg" name="mqttprojet1">
+      
+    <eAnnotations xmi:id="_PER8oecIEe6kSKfXD06Ujg" source="Objing">
+            
+        <contents xmi:type="uml:Property" xmi:id="_PER8oucIEe6kSKfXD06Ujg" name="exporterVersion">
+                  
+            <defaultValue xmi:type="uml:LiteralString" xmi:id="_PER8o-cIEe6kSKfXD06Ujg" value="3.0.0"/>
+                
+        </contents>
+          
+    </eAnnotations>
+      
+    <packagedElement xmi:type="uml:Class" xmi:id="_PER8pOcIEe6kSKfXD06Ujg" name="EspMQTTManager">
+            
+        <ownedComment xmi:type="uml:Comment" xmi:id="_PER8pecIEe6kSKfXD06Ujg">
+                  
+            <body/>
+                
+        </ownedComment>
+            
+        <ownedAttribute xmi:type="uml:Property" xmi:id="_PER8pucIEe6kSKfXD06Ujg" name="_user" visibility="private" isUnique="false">
+                  
+            <type xmi:type="uml:PrimitiveType" href="http://schema.omg.org/spec/UML/2.2/uml.xml#String"/>
+                
+        </ownedAttribute>
+            
+        <ownedAttribute xmi:type="uml:Property" xmi:id="_PER8p-cIEe6kSKfXD06Ujg" name="_password" visibility="private" isUnique="false">
+                  
+            <type xmi:type="uml:PrimitiveType" href="http://schema.omg.org/spec/UML/2.2/uml.xml#String"/>
+                
+        </ownedAttribute>
+            
+        <ownedAttribute xmi:type="uml:Property" xmi:id="_PER8qOcIEe6kSKfXD06Ujg" name="_serveraddress" visibility="private" type="_PER8r-cIEe6kSKfXD06Ujg" isUnique="false"/>
+            
+        <ownedAttribute xmi:type="uml:Property" xmi:id="_PER8qecIEe6kSKfXD06Ujg" name="_port" visibility="private" isUnique="false">
+                  
+            <ownedComment xmi:type="uml:Comment" xmi:id="_PER8qucIEe6kSKfXD06Ujg">
+                        
+                <body>&lt;Saisir le texte de la note ici&gt;</body>
+                      
+            </ownedComment>
+                  
+            <type xmi:type="uml:PrimitiveType" href="http://schema.omg.org/spec/UML/2.2/uml.xml#Integer"/>
+                
+        </ownedAttribute>
+            
+        <nestedClassifier xmi:type="uml:PrimitiveType" xmi:id="_PER8q-cIEe6kSKfXD06Ujg" visibility="private"/>
+            
+        <ownedOperation xmi:type="uml:Operation" xmi:id="_PER8rOcIEe6kSKfXD06Ujg" name="handle" visibility="public"/>
+            
+        <ownedOperation xmi:type="uml:Operation" xmi:id="_PER8recIEe6kSKfXD06Ujg" name="connect" visibility="public"/>
+            
+        <ownedOperation xmi:type="uml:Operation" xmi:id="_PER8rucIEe6kSKfXD06Ujg" name="setup" visibility="public"/>
+          
+    </packagedElement>
+      
+    <packagedElement xmi:type="uml:PrimitiveType" xmi:id="_PER8r-cIEe6kSKfXD06Ujg" name="IPAdress"/>
+      
+    <packagedElement xmi:type="uml:Class" xmi:id="_PER8sOcIEe6kSKfXD06Ujg" name="KY015">
+            
+        <ownedAttribute xmi:type="uml:Property" xmi:id="_PER8secIEe6kSKfXD06Ujg" name="_lastError" visibility="private" isUnique="false">
+                  
+            <type xmi:type="uml:PrimitiveType" href="http://schema.omg.org/spec/UML/2.2/uml.xml#Integer"/>
+                
+        </ownedAttribute>
+            
+        <ownedAttribute xmi:type="uml:Property" xmi:id="_PER8sucIEe6kSKfXD06Ujg" name="_status" visibility="private" isUnique="false">
+                  
+            <type xmi:type="uml:PrimitiveType" href="http://schema.omg.org/spec/UML/2.2/uml.xml#Integer"/>
+                
+        </ownedAttribute>
+            
+        <ownedAttribute xmi:type="uml:Property" xmi:id="_PER8s-cIEe6kSKfXD06Ujg" name="_pin" visibility="private" type="_PER8wOcIEe6kSKfXD06Ujg" isUnique="false"/>
+            
+        <ownedAttribute xmi:type="uml:Property" xmi:id="_PER8tOcIEe6kSKfXD06Ujg" name="_temperature" visibility="private" type="_PER8wecIEe6kSKfXD06Ujg" isUnique="false"/>
+            
+        <ownedAttribute xmi:type="uml:Property" xmi:id="_PER8tecIEe6kSKfXD06Ujg" name="_humidity" visibility="private" type="_PER8wecIEe6kSKfXD06Ujg" isUnique="false" isReadOnly="true"/>
+            
+        <ownedAttribute xmi:type="uml:Property" xmi:id="_PER8tucIEe6kSKfXD06Ujg" name="_intervalms" visibility="private" type="_PER8vucIEe6kSKfXD06Ujg" isUnique="false"/>
+            
+        <ownedAttribute xmi:type="uml:Property" xmi:id="_PER8t-cIEe6kSKfXD06Ujg" name="_lastReadms" visibility="private" type="_PER8sOcIEe6kSKfXD06Ujg" isUnique="false"/>
+            
+        <ownedAttribute xmi:type="uml:Property" xmi:id="_PER8uOcIEe6kSKfXD06Ujg" name="_valeur " visibility="private" type="_PER8wucIEe6kSKfXD06Ujg" isUnique="false"/>
+            
+        <ownedAttribute xmi:type="uml:Property" xmi:id="_PER8uecIEe6kSKfXD06Ujg" name="_mesure" visibility="private" type="_PER8wucIEe6kSKfXD06Ujg" isUnique="false"/>
+            
+        <ownedAttribute xmi:type="uml:Property" xmi:id="_PER8uucIEe6kSKfXD06Ujg" name="_mesuretime" visibility="private" type="_PER8vucIEe6kSKfXD06Ujg" isUnique="false"/>
+            
+        <ownedAttribute xmi:type="uml:Property" xmi:id="_PER8u-cIEe6kSKfXD06Ujg" name="_etatprecedent" visibility="private" isUnique="false">
+                  
+            <type xmi:type="uml:PrimitiveType" href="http://schema.omg.org/spec/UML/2.2/uml.xml#Integer"/>
+                
+        </ownedAttribute>
+            
+        <ownedAttribute xmi:type="uml:Property" xmi:id="_PER8vOcIEe6kSKfXD06Ujg" name="_tempsmontant" visibility="private" type="_PER8vucIEe6kSKfXD06Ujg" isUnique="false"/>
+            
+        <ownedAttribute xmi:type="uml:Property" xmi:id="_PER8vecIEe6kSKfXD06Ujg" name="_currentBit" visibility="private" type="_PER8wOcIEe6kSKfXD06Ujg" isUnique="false"/>
+          
+    </packagedElement>
+      
+    <packagedElement xmi:type="uml:PrimitiveType" xmi:id="_PER8vucIEe6kSKfXD06Ujg" name="unsigned long"/>
+      
+    <packagedElement xmi:type="uml:PrimitiveType" xmi:id="_PER8v-cIEe6kSKfXD06Ujg" name="byte[]"/>
+      
+    <packagedElement xmi:type="uml:PrimitiveType" xmi:id="_PER8wOcIEe6kSKfXD06Ujg" name="undefined"/>
+      
+    <packagedElement xmi:type="uml:PrimitiveType" xmi:id="_PER8wecIEe6kSKfXD06Ujg" name="float"/>
+      
+    <packagedElement xmi:type="uml:PrimitiveType" xmi:id="_PER8wucIEe6kSKfXD06Ujg" name="byte"/>
+    
+</uml:Model>
