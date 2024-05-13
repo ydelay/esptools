@@ -4,6 +4,10 @@
 #ifdef ESP32
     #include <WebServer.h>
     #include <WiFi.h>
+    #include <esp_heap_caps.h>
+    #include <esp_system.h>
+    #include <esp_partition.h>
+    #include <esp_ota_ops.h>
 #elif defined(ESP8266)
     #include <ESP8266WebServer.h>
     #include <ESP8266WiFi.h>

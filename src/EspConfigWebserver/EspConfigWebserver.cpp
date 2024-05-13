@@ -1,5 +1,6 @@
 #include <EspConfigWebserver.h>
 
+
 // --------------------------------------------------------------
 // Constructor  -  Initialize the webserver                    --
 // --------------------------------------------------------------
@@ -676,6 +677,8 @@ String EspConfigWebserver::Construire_deviceinfohtml(){
         float fvcc = vcc / 1024;
         String strvcc = String(fvcc, 2);
     #elif defined(ESP32)
+        esp_chip_info_t chip_info;
+        esp_chip_info(&chip_info);
         String strvcc = "N/A";
     #endif
     String page  = Construire_header(topic::Device);
@@ -693,7 +696,7 @@ String EspConfigWebserver::Construire_deviceinfohtml(){
     #ifdef ESP8266
         page.replace("<!--%DEVICELASTRESET%-->", ESP.getResetReason().c_str());
     #elif defined(ESP32)
-        page.replace("<!--%DEVICELASTRESET%-->", "N/A");
+        page.replace("<!--%DEVICELASTRESET%-->", esp_reset_reason().c_str());
     #endif
     page.replace("<!--%WEBUSER%-->", espConfig->getWEBUser().c_str());
     page.replace("<!--%WEBPASSWORD%-->", espConfig->getWEBPassword().c_str());
@@ -704,9 +707,20 @@ String EspConfigWebserver::Construire_deviceinfohtml(){
         page.replace("<!--%SDKVERSION%-->", String(ESP.getSdkVersion()));
         page.replace("<!--%FLASHSTATUS%-->", ESP.checkFlashCRC() ? "OK" : "KO");
     #elif defined(ESP32)
-        page.replace("<!--%COREVERSION%-->", "N/A");
-        page.replace("<!--%SDKVERSION%-->", "N/A");
-        page.replace("<!--%FLASHSTATUS%-->", "N/A");
+
+        page.replace("<!--%COREVERSION%-->", String(chip_info.revision).c_str());
+        page.replace("<!--%SDKVERSION%-->", esp_get_idf_version());
+        const esp_partition_t *running = esp_ota_get_running_partition();
+        uint8_t sha_256[ESP_PARTITION_HASH_LEN];
+        if (esp_partition_get_sha256(running, sha_256) == ESP_OK) 
+        {
+            page.replace("<!--%FLASHSTATUS%-->", "OK");
+        } 
+        else 
+        {
+            page.replace("<!--%FLASHSTATUS%-->", "KO");
+        }
+ 
     #endif
     page.replace("<!--%OTAACTIVATED%-->", espConfig->getOTAEnable() ? "Activated" : "Deactivated");
     page.replace("<!--%OTAPASSWORD%-->", espConfig->getOTAPassword().c_str());
@@ -743,16 +757,17 @@ String EspConfigWebserver::Construire_devicedetailhtml()
         page.replace("<!--%SKETCHFREESPACE%-->", String(ESP.getFreeSketchSpace()));
         page.replace("<!--%SKETCHMD5%-->", ESP.getSketchMD5().c_str());
     #elif defined(ESP32)
-        page.replace("<!--%FREEHEAP%-->", "N/A");
-        page.replace("<!--%HEAPFRAGMENTATION%-->", "N/A");
-        page.replace("<!--%HEAPMAXFREEBLOCK%-->", "N/A");
-        page.replace("<!--%FLASHCHIPID%-->", "N/A");
-        page.replace("<!--%FLASHCHIPSIZE%-->", "N/A");
-        page.replace("<!--%FLASHREALSIZE%-->", "N/A");
-        page.replace("<!--%FLASHCIPSPEED%-->", "N/A");
-        page.replace("<!--%SKETCHSIZE%-->", "N/A");
-        page.replace("<!--%SKETCHFREESPACE%-->", "N/A");
-        page.replace("<!--%SKETCHMD5%-->", "N/A");
+        page.replace("<!--%FREEHEAP%-->", String(esp_get_free_heap_size()));
+        page.replace("<!--%HEAPFRAGMENTATION%-->", String(heap_caps_get_free_size(MALLOC_CAP_8BIT)));
+        page.replace("<!--%HEAPMAXFREEBLOCK%-->", String(esp_get_minimum_free_heap_size()));
+        page.replace("<!--%FLASHCHIPID%-->", String(ESP.getEfuseMac()));
+        page.replace("<!--%FLASHCHIPSIZE%-->", String(ESP.getFlashChipSize()));
+        page.replace("<!--%FLASHCHIPSIZE%-->", String(ESP.getFlashChipSize()));
+        page.replace("<!--%FLASHCIPSPEED%-->", String(ESP.getFlashChipSpeed()));
+        const esp_app_desc_t* app_desc = esp_ota_get_app_description();
+        page.replace("<!--%SKETCHSIZE%-->", String(app_desc->image_len));
+        page.replace("<!--%SKETCHFREESPACE%-->", String(ESP.getFreeSketchSpace()));
+        page.replace("<!--%SKETCHMD5%-->", String(app_desc->version));
     #endif
     return page;
 }
