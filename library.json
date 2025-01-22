@@ -1,4 +1,5 @@
 {
+<<<<<<< HEAD
   "name": "esptools",
   "version": "1.0.0",
   "description": "Somme tools to creat my own esp",
@@ -9,11 +10,19 @@
     "url": "https://github.com/ydelay/esptools.git"
   },
   "authors": [
+=======
+    "name": "esptools",
+    "version": "v1.0.1",
+    "description": "Somme tools to creat my own esp",
+    "keywords": "tools",
+    "repository":
+>>>>>>> 21f673a9eae37efc7e3a4f51a6b48f1b8c461eea
     {
       "name": "Yves Delay",
       "email": "ydelay@delay-family.com",
       "maintainer": true
     }
+<<<<<<< HEAD
   ],
   "license": "MIT",
   "homepage": "https://www.helloworld.org/",
@@ -46,3 +55,6 @@
     "include": ["src","sample","README.md"]
   }
 }
+=======
+  }
+>>>>>>> 21f673a9eae37efc7e3a4f51a6b48f1b8c461eea
