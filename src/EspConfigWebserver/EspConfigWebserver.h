@@ -21,6 +21,10 @@
 #include <string>
 #include <EspConfigPagehtml.h>
 
+#ifdef ESP32
+    #define ESP_PARTITION_HASH_LEN 32
+#endif
+
 class EspConfigWebserver
 {
 

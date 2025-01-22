@@ -61,6 +61,9 @@ void setup()
   else
   {
     Serial.println("EEPROM déjà initialisée");
+    espConfig->setDeviceDescription("ESP32 avec configuration WEB");
+    espConfig->setDeviceLocation("A definir");
+    espConfig->save();
   }
 
   Serial.println("Configuration du WiFi");
@@ -92,6 +95,8 @@ void setup()
   espWebserver->begin();
 
   Serial.println("Fin de setup");
+  Serial.print("Adresse IP du serveur WEB : ");
+  Serial.println(WiFi.localIP());
 }
 
 // ------- Fonction Loop du programme --------------------------------------------------------------
@@ -136,8 +141,10 @@ void loop()
       Serial.println("Erreur de chargement de la structure depuis l'EEPROM");
     }
 
-    espWebserver->handleClient();
+
   }
+  espWebserver->handleClient();
+  debug ? Serial.print(".");
 }
 
 // ------- Core des fonctions déclarées  -----------------------------------------------------------

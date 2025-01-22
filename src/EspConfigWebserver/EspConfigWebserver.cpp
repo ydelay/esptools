@@ -1,4 +1,6 @@
 #include <EspConfigWebserver.h>
+#include <esp_ota_ops.h>
+#include <esp_partition.h>
 
 
 // --------------------------------------------------------------
@@ -696,7 +698,22 @@ String EspConfigWebserver::Construire_deviceinfohtml(){
     #ifdef ESP8266
         page.replace("<!--%DEVICELASTRESET%-->", ESP.getResetReason().c_str());
     #elif defined(ESP32)
-        page.replace("<!--%DEVICELASTRESET%-->", esp_reset_reason().c_str());
+        esp_reset_reason_t reset_reason = esp_reset_reason();
+        const char* reset_reason_str = "";
+        switch (reset_reason) {
+            case ESP_RST_POWERON: reset_reason_str = "Power on"; break;
+            case ESP_RST_EXT: reset_reason_str = "External reset"; break;
+            case ESP_RST_SW: reset_reason_str = "Software reset"; break;
+            case ESP_RST_PANIC: reset_reason_str = "Software panic"; break;
+            case ESP_RST_INT_WDT: reset_reason_str = "Interrupt watchdog"; break;
+            case ESP_RST_TASK_WDT: reset_reason_str = "Task watchdog"; break;
+            case ESP_RST_WDT: reset_reason_str = "Other watchdog"; break;
+            case ESP_RST_DEEPSLEEP: reset_reason_str = "Deep sleep"; break;
+            case ESP_RST_BROWNOUT: reset_reason_str = "Brownout"; break;
+            case ESP_RST_SDIO: reset_reason_str = "SDIO"; break;
+            default: reset_reason_str = "Unknown"; break;
+        }
+        page.replace("<!--%DEVICELASTRESET%-->", reset_reason_str);
     #endif
     page.replace("<!--%WEBUSER%-->", espConfig->getWEBUser().c_str());
     page.replace("<!--%WEBPASSWORD%-->", espConfig->getWEBPassword().c_str());
@@ -764,9 +781,20 @@ String EspConfigWebserver::Construire_devicedetailhtml()
         page.replace("<!--%FLASHCHIPSIZE%-->", String(ESP.getFlashChipSize()));
         page.replace("<!--%FLASHCHIPSIZE%-->", String(ESP.getFlashChipSize()));
         page.replace("<!--%FLASHCIPSPEED%-->", String(ESP.getFlashChipSpeed()));
-        const esp_app_desc_t* app_desc = esp_ota_get_app_description();
-        page.replace("<!--%SKETCHSIZE%-->", String(app_desc->image_len));
+        const esp_partition_t *running_partition = esp_ota_get_running_partition();
+        if (running_partition != NULL) 
+        {
+            // Obtenir la taille de la partition
+            size_t sketch_size = running_partition->size;
+            page.replace("<!--%SKETCHSIZE%-->", String(sketch_size));
+        } 
+        else 
+        {
+            page.replace("<!--%SKETCHSIZE%-->", "N/A");
+        }
+
         page.replace("<!--%SKETCHFREESPACE%-->", String(ESP.getFreeSketchSpace()));
+        const esp_app_desc_t* app_desc = esp_ota_get_app_description();
         page.replace("<!--%SKETCHMD5%-->", String(app_desc->version));
     #endif
     return page;
