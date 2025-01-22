@@ -23,7 +23,7 @@ private:
   WiFiMode_t mode = WIFI_OFF;
   int bestChannel = 0;
   
-  int choisirCanal();
+  int setBestChannel();
   
 public:
   /**

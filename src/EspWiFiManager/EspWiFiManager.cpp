@@ -28,6 +28,7 @@ int EspWiFiManager::getbestChannel()
 
 void EspWiFiManager::setup()
 {
+
     if (config == NULL)
     {
         _debug & _espconsoleactive ? _espconsole->println("Error: EspWiFiManager::setup() called without a valid EspConfigManager object"):0;
@@ -103,14 +104,14 @@ void EspWiFiManager::begin()
 {
     if (mode == WIFI_AP_STA)
     {
-        WiFi.softAP(config->getAccesspointWiFiSSID().c_str(), config->getAccesspointWiFiPassword().c_str(), choisirCanal());
+        WiFi.softAP(config->getAccesspointWiFiSSID().c_str(), config->getAccesspointWiFiPassword().c_str(), setBestChannel());
         WiFi.begin(config->getClientWiFiSSID().c_str(), config->getClientWiFiPassword().c_str());
         STAconnected = true;
         APconnected = true;
     }
     else if (mode == WIFI_AP)
     {
-        WiFi.softAP(config->getAccesspointWiFiSSID().c_str(), config->getAccesspointWiFiPassword().c_str(), choisirCanal());
+        WiFi.softAP(config->getAccesspointWiFiSSID().c_str(), config->getAccesspointWiFiPassword().c_str(), setBestChannel());
         APconnected = true;
     }
     else if (mode == WIFI_STA)
@@ -152,7 +153,7 @@ EspWiFiManager Accespointactif()
     return EspWiFiManager();
 }
 
-int EspWiFiManager::choisirCanal()
+int EspWiFiManager::setBestChannel()
 {
     const int MAX_CHANNELS = 13;
     //  sauvegarde l'état actuel de la connexion WiFi
