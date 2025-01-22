@@ -1,10 +1,23 @@
 #ifndef ESPCONFIGWEBSERVER_H
 #define ESPCONFIGWEBSERVER_H
+
+#ifdef ESP32
+    #include <WebServer.h>
+    #include <WiFi.h>
+    #include <esp_heap_caps.h>
+    #include <esp_system.h>
+    #include <esp_partition.h>
+    #include <esp_ota_ops.h>
+#elif defined(ESP8266)
+    #include <ESP8266WebServer.h>
+    #include <ESP8266WiFi.h>
+#else
+    #error "Ni ESP32 ni ESP8266 n'est défini"
+#endif
+
 #include <Arduino.h>
 #include <EspConfigManager.h>
 #include <EspConsole.h>
-#include <ESP8266WebServer.h>
-#include <ESP8266WiFi.h>
 #include <string>
 #include <EspConfigPagehtml.h>
 
@@ -15,11 +28,18 @@ private:
 
     enum topic {Device,MQTT,WiFi};
     enum subtopic {Info,Scan,Config,Detail,Web};
+    boolean _debug = false;
+    boolean _espconsoleactive = false;
 
+#ifdef ESP32
+    WiFiClass *espWiFi;
+    WebServer espWebserver;
+#elif defined(ESP8266)
     ESP8266WiFiClass *espWiFi;
-    EspConfigManager *espConfig;
     ESP8266WebServer espWebserver;
-    EspConsole *console;
+#endif
+    EspConfigManager *espConfig;
+    EspConsole *_espconsole;
     // char *webserveruser = "admin";
     // char *webserverpassword = "pwd4admin";
 
@@ -72,7 +92,14 @@ public:
 
     void Setup();
     void SetConsole(EspConsole *console);
+    void SetDebug(boolean debug);
+    #ifdef ESP8266
     void SetWifi(ESP8266WiFiClass *wifi);
+    #endif
+    #ifdef ESP32
+    void SetWifi(WiFiClass *wifi);
+    #endif
+    
     void SetConfig(EspConfigManager *config);
 
 

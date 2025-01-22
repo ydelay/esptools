@@ -1,6 +1,12 @@
 #ifndef ESPWIFIMANAGER_H
 #define ESPWIFIMANAGER_H
-#include <ESP8266WifI.h>
+#ifdef ESP8266
+  #include <ESP8266WiFi.h>
+#elif defined(ESP32)
+  #include <WiFi.h>
+#else
+  #error "Ni ESP32 ni ESP8266 n'est défini"
+#endif
 #include <EspConsole.h>
 #include <EspConfigManager.h>
 
@@ -8,13 +14,16 @@ class EspWiFiManager
 {
 private:
   EspConfigManager *config;
-  EspConsole *console;
+  EspConsole *_espconsole;
+  boolean _debug = false;
+  boolean _espconsoleactive = false;
 
   bool STAconnected = false;
   bool APconnected = false;
   WiFiMode_t mode = WIFI_OFF;
+  int bestChannel = 0;
   
-  int choisirCanal();
+  int setBestChannel();
   
 public:
   /**
@@ -35,6 +44,7 @@ public:
 
   void setconfig(EspConfigManager *pconfigManager);
   void setconsole(EspConsole *pconsole);
+  int getbestChannel();
 
   void setup();
 

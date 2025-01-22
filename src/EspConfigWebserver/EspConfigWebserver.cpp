@@ -1,12 +1,14 @@
 #include <EspConfigWebserver.h>
 
+
 // --------------------------------------------------------------
 // Constructor  -  Initialize the webserver                    --
 // --------------------------------------------------------------
 
 EspConfigWebserver::EspConfigWebserver()
 {
-    console = nullptr;
+    _espconsole = nullptr;
+    _espconsoleactive = false;
     espWiFi = nullptr;
     espConfig = nullptr;
 }
@@ -38,13 +40,27 @@ void EspConfigWebserver::Setup()
 
 void EspConfigWebserver::SetConsole(EspConsole *console)
 {
-    this->console = console;
+    this->_espconsole = console;
+    this->_espconsoleactive = true;
 }
 
-void EspConfigWebserver::SetWifi(ESP8266WiFiClass *wifi)
+void EspConfigWebserver::SetDebug(boolean debug)
 {
-    espWiFi = wifi;
+    _debug = debug;
 }
+
+#ifdef ESP32
+    void EspConfigWebserver::SetWifi(WiFiClass *wifi)
+    {
+        espWiFi = wifi;
+    }
+#elif defined(ESP8266)
+    void EspConfigWebserver::SetWifi(ESP8266WiFiClass *wifi)
+    {
+        espWiFi = wifi;
+    }
+#endif
+
 void EspConfigWebserver::SetConfig(EspConfigManager *config)
 {
     espConfig = config;
@@ -94,10 +110,10 @@ void EspConfigWebserver::handledeviceinfo() // OK adapted
     if (!espWebserver.authenticate(espConfig->getWEBUser().c_str(), espConfig->getWEBPassword().c_str())) {
       return espWebserver.requestAuthentication();
     }
-    console->println("handledeviceinfo : Start");
+    _debug & _espconsoleactive ? _espconsole->println("handledeviceinfo : Start"):0;
     String pagehtml(Construire_deviceinfohtml());
     espWebserver.send(200, "text/html", pagehtml);
-    console->println("handledeviceinfo : finished");
+    _debug & _espconsoleactive ? _espconsole->println("handledeviceinfo : finished"):0;
 }
 
 void EspConfigWebserver::handledevicedetail()
@@ -105,10 +121,10 @@ void EspConfigWebserver::handledevicedetail()
     if (!espWebserver.authenticate(espConfig->getWEBUser().c_str(), espConfig->getWEBPassword().c_str())) {
       return espWebserver.requestAuthentication();
     }
-    console->println("handledevicedetail : Start");
+    _debug & _espconsoleactive ? _espconsole->println("handledevicedetail : Start"):0;
     String pagehtml(Construire_devicedetailhtml());
     espWebserver.send(200, "text/html", pagehtml);
-    console->println("handledevicedetail : finished");
+    _debug & _espconsoleactive ? _espconsole->println("handledevicedetail : finished"):0;
 
 }
 
@@ -118,10 +134,10 @@ void EspConfigWebserver::handledeviceconfig()
       return espWebserver.requestAuthentication();
     }
 
-    console->println("handledeviceconfig : Start");
+    _debug & _espconsoleactive ? _espconsole->println("handledeviceconfig : Start"):0;
     String pagehtml(Construire_deviceconfightml());
     espWebserver.send(200, "text/html", pagehtml);
-    console->println("handledeviceconfig : finished");
+    _debug & _espconsoleactive ? _espconsole->println("handledeviceconfig : finished"):0;
 
 }
 
@@ -146,9 +162,9 @@ void EspConfigWebserver::handledevicesubmit()
         // devicename: 13737612     espConfig.setDeviceName()
         // devicelocation:          espConfig.setDeviceLocation()
         // devicedescription:       espConfig.setDeviceDescription()
-        console->println("handledevicesubmit : devicename     = " + espWebserver.arg("devicename"));
-        console->println("handledevicesubmit : devicelocation     = " + espWebserver.arg("devicelocation"));
-        console->println("handledevicesubmit : devicedescription = " + espWebserver.arg("devicedescription"));
+        _debug & _espconsoleactive ? _espconsole->println("handledevicesubmit : devicename     = " + espWebserver.arg("devicename")):0;
+        _debug & _espconsoleactive ? _espconsole->println("handledevicesubmit : devicelocation     = " + espWebserver.arg("devicelocation")):0;
+        _debug & _espconsoleactive ? _espconsole->println("handledevicesubmit : devicedescription = " + espWebserver.arg("devicedescription")):0;
         espConfig->setDeviceName(espWebserver.arg("devicename").c_str());
         espConfig->setDeviceLocation(espWebserver.arg("devicelocation").c_str());
         espConfig->setDeviceDescription(espWebserver.arg("devicedescription").c_str());
@@ -159,9 +175,9 @@ void EspConfigWebserver::handledevicesubmit()
         // webuser: admin           espConfig.setWEBUser()
         // webpassword: pwd4admin   espConfig.setWEBPassword()
         // webport: 8080            espConfig.setWEBPort()
-        console->println("handledevicesubmit : webuser     = " + espWebserver.arg("webuser"));
-        console->println("handledevicesubmit : webpassword     = " + espWebserver.arg("webpassword"));
-        console->println("handledevicesubmit : webport = " + espWebserver.arg("webport"));
+        _debug & _espconsoleactive ? _espconsole->println("handledevicesubmit : webuser     = " + espWebserver.arg("webuser")):0;
+        _debug & _espconsoleactive ? _espconsole->println("handledevicesubmit : webpassword     = " + espWebserver.arg("webpassword")):0;
+        _debug & _espconsoleactive ? _espconsole->println("handledevicesubmit : webport = " + espWebserver.arg("webport")):0;
         espConfig->setWEBUser(espWebserver.arg("webuser").c_str());
         espConfig->setWEBPassword(espWebserver.arg("webpassword").c_str());
         espConfig->setWEBPort(espWebserver.arg("webport").toInt());
@@ -172,8 +188,8 @@ void EspConfigWebserver::handledevicesubmit()
     // otaport: 8266            espConfig.setOTAPort()
     if (espWebserver.hasArg("otapassword") && espWebserver.hasArg("otaport"))
     {
-        console->println("handledevicesubmit : otapassword = " + espWebserver.arg("otapassword"));
-        console->println("handledevicesubmit : otaport = " + espWebserver.arg("otaport"));
+        _debug & _espconsoleactive ? _espconsole->println("handledevicesubmit : otapassword = " + espWebserver.arg("otapassword")):0;
+        _debug & _espconsoleactive ? _espconsole->println("handledevicesubmit : otaport = " + espWebserver.arg("otaport")):0;
         espConfig->setOTAPassword(espWebserver.arg("otapassword").c_str());
         espConfig->setOTAPort(espWebserver.arg("otaport").toInt());
 
@@ -182,26 +198,26 @@ void EspConfigWebserver::handledevicesubmit()
     // otaenable: on            espConfig.setOTAActivate()
     if (espWebserver.hasArg("otaenable"))
     {
-        console->println("handledevicesubmit : otaenable     = " + espWebserver.arg("otaenable"));
+        _debug & _espconsoleactive ? _espconsole->println("handledevicesubmit : otaenable     = " + espWebserver.arg("otaenable")):0;
         if (espWebserver.arg("otaenable") == "on")
         {
             espConfig->setOTAEnable(true);
-            console->println("handledevicesubmit : otaenable saved as true");
+            _debug & _espconsoleactive ? _espconsole->println("handledevicesubmit : otaenable saved as true"):0;
             if (espConfig->getOTAEnable())
             {
-                console->println("handledevicesubmit : otaenable still as true");
+                _debug & _espconsoleactive ? _espconsole->println("handledevicesubmit : otaenable still as true"):0;
             }
         }
         else
         {
             espConfig->setOTAEnable(false);
-            console->println("handledevicesubmit : otaenable saved as false");
+            _debug & _espconsoleactive ? _espconsole->println("handledevicesubmit : otaenable saved as false"):0;
         }
     }
     else
     {
         espConfig->setOTAEnable(false);
-        console->println("handledevicesubmit : otaenable saved as false");
+        _debug & _espconsoleactive ? _espconsole->println("handledevicesubmit : otaenable saved as false"):0;
     }
 
 
@@ -216,7 +232,7 @@ void EspConfigWebserver::handlemqttinfo()
     if (!espWebserver.authenticate(espConfig->getWEBUser().c_str(), espConfig->getWEBPassword().c_str())) {
       return espWebserver.requestAuthentication();
     }
-    console->println("handlemqttinfo : Start");
+    _debug & _espconsoleactive ? _espconsole->println("handlemqttinfo : Start"):0;
     String pagehtml(Construire_mqttinfohtml());
     espWebserver.send(200, "text/html", pagehtml);
 }
@@ -226,7 +242,7 @@ void EspConfigWebserver::handlemqttconfig()
     if (!espWebserver.authenticate(espConfig->getWEBUser().c_str(), espConfig->getWEBPassword().c_str())) {
       return espWebserver.requestAuthentication();
     }
-    console->println("handlemqttconfig : Start");
+    _debug & _espconsoleactive ? _espconsole->println("handlemqttconfig : Start"):0;
     String pagehtml(Construire_mqttconfightml());
     espWebserver.send(200, "text/html", pagehtml);
 }
@@ -238,7 +254,7 @@ void EspConfigWebserver::handlemqttconfig()
 
 void EspConfigWebserver::handlemqttsubmit()
 {
-    console->println("handlemqttsubmit : Start");
+    _debug & _espconsoleactive ? _espconsole->println("handlemqttsubmit : Start"):0;
     IPAddress l_IP;
     if (!espWebserver.authenticate(espConfig->getWEBUser().c_str(), espConfig->getWEBPassword().c_str())) {
       return espWebserver.requestAuthentication();
@@ -249,8 +265,8 @@ void EspConfigWebserver::handlemqttsubmit()
     if (espWebserver.hasArg("mqttuser") && espWebserver.hasArg("mqttpassword"))
     {
         // Utilisez ssid et password ici
-        console->println("handlemqttsubmit : mqttuser     = " + espWebserver.arg("mqttuser"));
-        console->println("handlemqttsubmit : mqttpassword = " + espWebserver.arg("mqttpassword"));
+        _debug & _espconsoleactive ? _espconsole->println("handlemqttsubmit : mqttuser     = " + espWebserver.arg("mqttuser")):0;
+        _debug & _espconsoleactive ? _espconsole->println("handlemqttsubmit : mqttpassword = " + espWebserver.arg("mqttpassword")):0;
         espConfig->setMQTTUser(espWebserver.arg("mqttuser").c_str());
         espConfig->setMQTTPassword(espWebserver.arg("mqttpassword").c_str());
     }
@@ -258,7 +274,7 @@ void EspConfigWebserver::handlemqttsubmit()
     // mqttport: 0                         espConfig->setMQTTPort()
     if (espWebserver.hasArg("mqttport"))
     {
-        console->println("handlemqttsubmit : mqttport = " + espWebserver.arg("mqttport"));
+        _debug & _espconsoleactive ? _espconsole->println("handlemqttsubmit : mqttport = " + espWebserver.arg("mqttport")):0;
         espConfig->setMQTTPort(espWebserver.arg("mqttport").toInt());
 
     }
@@ -266,7 +282,7 @@ void EspConfigWebserver::handlemqttsubmit()
     if (espWebserver.hasArg("mqttserverip"))
     {
         // Utilisez mqttserverip ici
-        console->println("handlemqttsubmit : mqttserverip      = " + espWebserver.arg("mqttserverip"));
+        _debug & _espconsoleactive ? _espconsole->println("handlemqttsubmit : mqttserverip      = " + espWebserver.arg("mqttserverip")):0;
         // mqttserverip: (IP unset)            espConfig->setMQTTServer()
         if (espWebserver.arg("mqttserverip") == "(IP unset)")
         {
@@ -282,7 +298,7 @@ void EspConfigWebserver::handlemqttsubmit()
     espConfig->save();
     String strconfig = "POST completed : \n\n";
     espWebserver.send(200, "text/plain", strconfig);
-    console->println("handlemqttsubmit : End");
+    _debug & _espconsoleactive ? _espconsole->println("handlemqttsubmit : End"):0;
 
 }
 
@@ -291,10 +307,10 @@ void EspConfigWebserver::handlewifiinfo()
     if (!espWebserver.authenticate(espConfig->getWEBUser().c_str(), espConfig->getWEBPassword().c_str())) {
       return espWebserver.requestAuthentication();
     }
-    console->println("handlewifiinfo : Start");
+    _debug & _espconsoleactive ? _espconsole->println("handlewifiinfo : Start"):0;
     String pagehtml(Construire_wifiinfohtml());
     espWebserver.send(200, "text/html", pagehtml);
-    console->println("handlewifiinfo : finished");
+    _debug & _espconsoleactive ? _espconsole->println("handlewifiinfo : finished"):0;
 }
 
 void EspConfigWebserver::handlewifiscan()
@@ -302,10 +318,10 @@ void EspConfigWebserver::handlewifiscan()
     if (!espWebserver.authenticate(espConfig->getWEBUser().c_str(), espConfig->getWEBPassword().c_str())) {
       return espWebserver.requestAuthentication();
     }
-    console->println("handlewifiscan : Start");
+    _debug & _espconsoleactive ? _espconsole->println("handlewifiscan : Start"):0;
     String pagehtml(Construire_wifiscanhtml());
     espWebserver.send(200, "text/html", pagehtml);
-    console->println("handlewifiscan : finished");
+    _debug & _espconsoleactive ? _espconsole->println("handlewifiscan : finished"):0;
 }
 
 void EspConfigWebserver::handlewificonfig()
@@ -313,10 +329,10 @@ void EspConfigWebserver::handlewificonfig()
     if (!espWebserver.authenticate(espConfig->getWEBUser().c_str(), espConfig->getWEBPassword().c_str())) {
       return espWebserver.requestAuthentication();
     }
-    console->println("handlewificonfig : Start");
+    _debug & _espconsoleactive ? _espconsole->println("handlewificonfig : Start"):0;
     String pagehtml(Construire_wificonfightml());
     espWebserver.send(200, "text/html", pagehtml);
-    console->println("handlewificonfig : finished");
+    _debug & _espconsoleactive ? _espconsole->println("handlewificonfig : finished"):0;
 }
 
 void EspConfigWebserver::handlewifisubmit() // OK adapted
@@ -349,8 +365,8 @@ void EspConfigWebserver::handlewifisubmit() // OK adapted
     if (espWebserver.hasArg("STAssid") && espWebserver.hasArg("STApassword"))
     {
         // Utilisez ssid et password ici
-        console->println("handleFormWiFiconfig : STAssid     = " + espWebserver.arg("STAssid"));
-        console->println("handleFormWiFiconfig : STApassword = " + espWebserver.arg("STApassword"));
+        _debug & _espconsoleactive ? _espconsole->println("handleFormWiFiconfig : STAssid     = " + espWebserver.arg("STAssid")):0;
+        _debug & _espconsoleactive ? _espconsole->println("handleFormWiFiconfig : STApassword = " + espWebserver.arg("STApassword")):0;
         espConfig->setClientWiFiSSID(espWebserver.arg("STAssid").c_str());
         espConfig->setClientWiFiPassword(espWebserver.arg("STApassword").c_str());
     }
@@ -358,47 +374,47 @@ void EspConfigWebserver::handlewifisubmit() // OK adapted
     // "stamode": "active",                   espConfig->setClientWiFiToActivate()
     if (espWebserver.hasArg("stamode"))
     {
-        console->println("handleFormWiFiconfig : stamode     = " + espWebserver.arg("stamode"));
+        _debug & _espconsoleactive ? _espconsole->println("handleFormWiFiconfig : stamode     = " + espWebserver.arg("stamode")):0;
         if (espWebserver.arg("stamode") == "active")
         {
             espConfig->setClientWiFiToActivate(true);
-            console->println("handleFormWiFiconfig : stamode saved as true");
+            _debug & _espconsoleactive ? _espconsole->println("handleFormWiFiconfig : stamode saved as true"):0;
             if (espConfig->getClientWiFiToActivate())
             {
-                console->println("handleFormWiFiconfig : stamode still as true");
+                _debug & _espconsoleactive ? _espconsole->println("handleFormWiFiconfig : stamode still as true"):0;
             }
         }
         else
         {
             espConfig->setClientWiFiToActivate(false);
-            console->println("handleFormWiFiconfig : stamode saved as false");
+            _debug & _espconsoleactive ? _espconsole->println("handleFormWiFiconfig : stamode saved as false"):0;
         }
     }
     else
     {
         espConfig->setClientWiFiToActivate(false);
-        console->println("handleFormWiFiconfig : stamode saved as false");
+        _debug & _espconsoleactive ? _espconsole->println("handleFormWiFiconfig : stamode saved as false"):0;
     }
 
     // "stadhcp": "checked",                  !espConfig->setClientWiFiManualIP()
     if (espWebserver.hasArg("stadhcp"))
     {
-        console->println("handleFormWiFiconfig : stadhcp     = " + espWebserver.arg("stadhcp"));
+        _debug & _espconsoleactive ? _espconsole->println("handleFormWiFiconfig : stadhcp     = " + espWebserver.arg("stadhcp")):0;
         if (espWebserver.arg("stadhcp") == "checked")
         {
             espConfig->setClientWiFiManualIP(false);
-            console->println("handleFormWiFiconfig : stadhcp saved as false");
+            _debug & _espconsoleactive ? _espconsole->println("handleFormWiFiconfig : stadhcp saved as false"):0;
         }
         else
         {
             espConfig->setClientWiFiManualIP(true);
-            console->println("handleFormWiFiconfig : stadhcp saved as true");
+            _debug & _espconsoleactive ? _espconsole->println("handleFormWiFiconfig : stadhcp saved as true"):0;
         }
     }
     else
     {
         espConfig->setClientWiFiManualIP(true);
-        console->println("handleFormWiFiconfig : stadhcp saved as true");
+        _debug & _espconsoleactive ? _espconsole->println("handleFormWiFiconfig : stadhcp saved as true"):0;
     }
 
     // "STAadress": "192.168.0.130",          espConfig->setClientAdresse()
@@ -408,10 +424,10 @@ void EspConfigWebserver::handlewifisubmit() // OK adapted
     if (espWebserver.hasArg("STAadress") && espWebserver.hasArg("STAsubnet") && espWebserver.hasArg("STAgateway") && espWebserver.hasArg("STAdns"))
     {
         // Utilisez adresse, subnet, gateway et dns ici
-        console->println("handleFormWiFiconfig : STAadress   = " + espWebserver.arg("STAadress"));
-        console->println("handleFormWiFiconfig : STAsubnet   = " + espWebserver.arg("STAsubnet"));
-        console->println("handleFormWiFiconfig : STAgateway  = " + espWebserver.arg("STAgateway"));
-        console->println("handleFormWiFiconfig : STAdns      = " + espWebserver.arg("STAdns"));
+        _debug & _espconsoleactive ? _espconsole->println("handleFormWiFiconfig : STAadress   = " + espWebserver.arg("STAadress")):0;
+        _debug & _espconsoleactive ? _espconsole->println("handleFormWiFiconfig : STAsubnet   = " + espWebserver.arg("STAsubnet")):0;
+        _debug & _espconsoleactive ? _espconsole->println("handleFormWiFiconfig : STAgateway  = " + espWebserver.arg("STAgateway")):0;
+        _debug & _espconsoleactive ? _espconsole->println("handleFormWiFiconfig : STAdns      = " + espWebserver.arg("STAdns")):0;
         // "STAadress": "192.168.0.130",          espConfig->setClientAdresse()
         if (espWebserver.arg("STAadress") == "(IP unset)")
         {
@@ -463,8 +479,8 @@ void EspConfigWebserver::handlewifisubmit() // OK adapted
     if (espWebserver.hasArg("APssid") && espWebserver.hasArg("APpassword"))
     {
         // Utilisez APssid et APpassword ici
-        console->println("handleFormWiFiconfig : APssid      = " + espWebserver.arg("APssid"));
-        console->println("handleFormWiFiconfig : APpassword  = " + espWebserver.arg("APpassword"));
+        _debug & _espconsoleactive ? _espconsole->println("handleFormWiFiconfig : APssid      = " + espWebserver.arg("APssid")):0;
+        _debug & _espconsoleactive ? _espconsole->println("handleFormWiFiconfig : APpassword  = " + espWebserver.arg("APpassword")):0;
         espConfig->setAccesspointWiFiSSID(espWebserver.arg("APssid").c_str());
         espConfig->setAccesspointWiFiPassword(espWebserver.arg("APpassword").c_str());
     }
@@ -472,45 +488,45 @@ void EspConfigWebserver::handlewifisubmit() // OK adapted
     // "apmode": "active",                    espConfig->setAccesspointWiFiToActivate()
     if (espWebserver.hasArg("apmode"))
     {
-        console->println("handleFormWiFiconfig : apmode      = " + espWebserver.arg("apmode"));
+        _debug & _espconsoleactive ? _espconsole->println("handleFormWiFiconfig : apmode      = " + espWebserver.arg("apmode")):0;
         // Utilisez apmode ici
         if (espWebserver.arg("apmode") == "active")
         {
             espConfig->setAccesspointWiFiToActivate(true);
-            console->println("handleFormWiFiconfig : apmode saved as true");
+            _debug & _espconsoleactive ? _espconsole->println("handleFormWiFiconfig : apmode saved as true"):0;
         }
         else
         {
             espConfig->setAccesspointWiFiToActivate(false);
-            console->println("handleFormWiFiconfig : apmode saved as false");
+            _debug & _espconsoleactive ? _espconsole->println("handleFormWiFiconfig : apmode saved as false"):0;
         }
     }
     else
     {
         espConfig->setAccesspointWiFiToActivate(false);
-        console->println("handleFormWiFiconfig : apmode saved as false");
+        _debug & _espconsoleactive ? _espconsole->println("handleFormWiFiconfig : apmode saved as false"):0;
     }
 
     // "IPdefault": "checked",                !espConfig->setAccesspointWiFiManualIP()
     if (espWebserver.hasArg("IPdefault"))
     {
-        console->println("handleFormWiFiconfig : IPdefault   = " + espWebserver.arg("IPdefault"));
+        _debug & _espconsoleactive ? _espconsole->println("handleFormWiFiconfig : IPdefault   = " + espWebserver.arg("IPdefault")):0;
         // Utilisez IPdefault ici
         if (espWebserver.arg("IPdefault") == "checked")
         {
             espConfig->setAccesspointWiFiManualIP(false);
-            console->println("handleFormWiFiconfig : IPdefault saved as false");
+            _debug & _espconsoleactive ? _espconsole->println("handleFormWiFiconfig : IPdefault saved as false"):0;
         }
         else
         {
             espConfig->setAccesspointWiFiManualIP(true);
-            console->println("handleFormWiFiconfig : IPdefault saved as true");
+            _debug & _espconsoleactive ? _espconsole->println("handleFormWiFiconfig : IPdefault saved as true"):0;
         }
     }
     else
     {
         espConfig->setAccesspointWiFiManualIP(true);
-        console->println("handleFormWiFiconfig : IPdefault saved as true");
+        _debug & _espconsoleactive ? _espconsole->println("handleFormWiFiconfig : IPdefault saved as true"):0;
     }
 
     // "APadress": "192.168.10.1",            espConfig->setAccesspointAdresse()
@@ -522,10 +538,10 @@ void EspConfigWebserver::handlewifisubmit() // OK adapted
 
         // Utilisez adresse, subnet, gateway et dns ici
 
-        console->println("handleFormWiFiconfig : APadress    = " + espWebserver.arg("APadress"));
-        console->println("handleFormWiFiconfig : APsubnet    = " + espWebserver.arg("APsubnet"));
-        console->println("handleFormWiFiconfig : APgateway   = " + espWebserver.arg("APgateway"));
-        console->println("handleFormWiFiconfig : APdns       = " + espWebserver.arg("APdns"));
+        _debug & _espconsoleactive ? _espconsole->println("handleFormWiFiconfig : APadress    = " + espWebserver.arg("APadress")):0;
+        _debug & _espconsoleactive ? _espconsole->println("handleFormWiFiconfig : APsubnet    = " + espWebserver.arg("APsubnet")):0;
+        _debug & _espconsoleactive ? _espconsole->println("handleFormWiFiconfig : APgateway   = " + espWebserver.arg("APgateway")):0;
+        _debug & _espconsoleactive ? _espconsole->println("handleFormWiFiconfig : APdns       = " + espWebserver.arg("APdns")):0;
 
         // "APadress": "192.168.10.1",            espConfig->setAccesspointAdresse()
         if (espWebserver.arg("APadress") == "(IP unset)")
@@ -656,25 +672,56 @@ String EspConfigWebserver::Construire_deviceheader(subtopic wifitopic)
 // <!--%OTAPASSWORD%-->       : Config.getOTAPassword()
 
 String EspConfigWebserver::Construire_deviceinfohtml(){   
-    uint16_t vcc = ESP.getVcc();
-    float fvcc = vcc / 1024;
-    String strvcc = String(fvcc, 2);
+    #ifdef ESP8266
+        uint16_t vcc = ESP.getVcc();
+        float fvcc = vcc / 1024;
+        String strvcc = String(fvcc, 2);
+    #elif defined(ESP32)
+        esp_chip_info_t chip_info;
+        esp_chip_info(&chip_info);
+        String strvcc = "N/A";
+    #endif
     String page  = Construire_header(topic::Device);
     page += Construire_deviceheader(subtopic::Info);
     page += String(reinterpret_cast<const __FlashStringHelper *>(device_info_html));
     page.replace("<!--%DEVICENAME%-->", espConfig->getDeviceName().c_str());
-    page.replace("<!--%DEVICEID%-->", String(ESP.getChipId()).c_str());
+    #ifdef ESP8266
+        page.replace("<!--%DEVICEID%-->", String(ESP.getChipId()).c_str());
+    #elif defined(ESP32)
+        page.replace("<!--%DEVICEID%-->", "N/A");
+    #endif
     page.replace("<!--%DEVICELOCATION%-->", espConfig->getDeviceLocation().c_str());
     page.replace("<!--%DEVICEDESCRIPTION%-->", espConfig->getDeviceDescription().c_str());
     page.replace("<!--%DEVICEVCC%-->", strvcc);
-    page.replace("<!--%DEVICELASTRESET%-->", ESP.getResetReason().c_str());
+    #ifdef ESP8266
+        page.replace("<!--%DEVICELASTRESET%-->", ESP.getResetReason().c_str());
+    #elif defined(ESP32)
+        page.replace("<!--%DEVICELASTRESET%-->", esp_reset_reason().c_str());
+    #endif
     page.replace("<!--%WEBUSER%-->", espConfig->getWEBUser().c_str());
     page.replace("<!--%WEBPASSWORD%-->", espConfig->getWEBPassword().c_str());
     page.replace("<!--%WEBPORT%-->", String(espConfig->getWEBPort()));
     page.replace("<!--%WEBSTATUS%-->",  "Running");
-    page.replace("<!--%COREVERSION%-->", ESP.getCoreVersion().c_str());
-    page.replace("<!--%SDKVERSION%-->", String(ESP.getSdkVersion()));
-    page.replace("<!--%FLASHSTATUS%-->", ESP.checkFlashCRC() ? "OK" : "KO");
+    #ifdef ESP8266
+        page.replace("<!--%COREVERSION%-->", ESP.getCoreVersion().c_str());
+        page.replace("<!--%SDKVERSION%-->", String(ESP.getSdkVersion()));
+        page.replace("<!--%FLASHSTATUS%-->", ESP.checkFlashCRC() ? "OK" : "KO");
+    #elif defined(ESP32)
+
+        page.replace("<!--%COREVERSION%-->", String(chip_info.revision).c_str());
+        page.replace("<!--%SDKVERSION%-->", esp_get_idf_version());
+        const esp_partition_t *running = esp_ota_get_running_partition();
+        uint8_t sha_256[ESP_PARTITION_HASH_LEN];
+        if (esp_partition_get_sha256(running, sha_256) == ESP_OK) 
+        {
+            page.replace("<!--%FLASHSTATUS%-->", "OK");
+        } 
+        else 
+        {
+            page.replace("<!--%FLASHSTATUS%-->", "KO");
+        }
+ 
+    #endif
     page.replace("<!--%OTAACTIVATED%-->", espConfig->getOTAEnable() ? "Activated" : "Deactivated");
     page.replace("<!--%OTAPASSWORD%-->", espConfig->getOTAPassword().c_str());
     page.replace("<!--%OTAPORT%-->", String(espConfig->getOTAPort()));
@@ -698,17 +745,30 @@ String EspConfigWebserver::Construire_devicedetailhtml()
     String page = Construire_header(topic::Device);
     page += Construire_deviceheader(subtopic::Detail);
     page += String(reinterpret_cast<const __FlashStringHelper *>(device_detail_html));
-    page.replace("<!--%FREEHEAP%-->", String(ESP.getFreeHeap()));
-    page.replace("<!--%HEAPFRAGMENTATION%-->", String(ESP.getHeapFragmentation()));
-    page.replace("<!--%HEAPMAXFREEBLOCK%-->", String(ESP.getMaxFreeBlockSize()));
-    page.replace("<!--%FLASHCHIPID%-->", String(ESP.getFlashChipId()));
-    page.replace("<!--%FLASHCHIPSIZE%-->", String(ESP.getFlashChipSize()));
-    page.replace("<!--%FLASHREALSIZE%-->", String(ESP.getFlashChipRealSize()));
-    page.replace("<!--%FLASHCIPSPEED%-->", String(ESP.getFlashChipSpeed()));
-    page.replace("<!--%SKETCHSIZE%-->", String(ESP.getSketchSize()));
-    page.replace("<!--%SKETCHFREESPACE%-->", String(ESP.getFreeSketchSpace()));
-    page.replace("<!--%SKETCHMD5%-->", ESP.getSketchMD5().c_str());
-    page += Construire_footer();
+    #ifdef ESP8266
+        page.replace("<!--%FREEHEAP%-->", String(ESP.getFreeHeap()));
+        page.replace("<!--%HEAPFRAGMENTATION%-->", String(ESP.getHeapFragmentation()));
+        page.replace("<!--%HEAPMAXFREEBLOCK%-->", String(ESP.getMaxFreeBlockSize()));
+        page.replace("<!--%FLASHCHIPID%-->", String(ESP.getFlashChipId()));
+        page.replace("<!--%FLASHCHIPSIZE%-->", String(ESP.getFlashChipSize()));
+        page.replace("<!--%FLASHREALSIZE%-->", String(ESP.getFlashChipRealSize()));
+        page.replace("<!--%FLASHCIPSPEED%-->", String(ESP.getFlashChipSpeed()));
+        page.replace("<!--%SKETCHSIZE%-->", String(ESP.getSketchSize()));
+        page.replace("<!--%SKETCHFREESPACE%-->", String(ESP.getFreeSketchSpace()));
+        page.replace("<!--%SKETCHMD5%-->", ESP.getSketchMD5().c_str());
+    #elif defined(ESP32)
+        page.replace("<!--%FREEHEAP%-->", String(esp_get_free_heap_size()));
+        page.replace("<!--%HEAPFRAGMENTATION%-->", String(heap_caps_get_free_size(MALLOC_CAP_8BIT)));
+        page.replace("<!--%HEAPMAXFREEBLOCK%-->", String(esp_get_minimum_free_heap_size()));
+        page.replace("<!--%FLASHCHIPID%-->", String(ESP.getEfuseMac()));
+        page.replace("<!--%FLASHCHIPSIZE%-->", String(ESP.getFlashChipSize()));
+        page.replace("<!--%FLASHCHIPSIZE%-->", String(ESP.getFlashChipSize()));
+        page.replace("<!--%FLASHCIPSPEED%-->", String(ESP.getFlashChipSpeed()));
+        const esp_app_desc_t* app_desc = esp_ota_get_app_description();
+        page.replace("<!--%SKETCHSIZE%-->", String(app_desc->image_len));
+        page.replace("<!--%SKETCHFREESPACE%-->", String(ESP.getFreeSketchSpace()));
+        page.replace("<!--%SKETCHMD5%-->", String(app_desc->version));
+    #endif
     return page;
 }
 
@@ -868,13 +928,21 @@ String EspConfigWebserver::Construire_wifiscanhtml() // OK adapted
 
     for (int i = 0; i < nb_network; i++)
     {
-        
         wifiscanrows += wifiscanonerow;
-        espWiFi->getNetworkInfo(i, ssid, encryptionType, RSSI, BSSID, channel, isHidden);
-        lrssi = std::to_string(RSSI);
-        lrssi = lrssi + "dB";
-        lchannel = std::to_string(channel);
-
+        #ifdef ESP8266
+            espWiFi->getNetworkInfo(i, ssid, encryptionType, RSSI, BSSID, channel, isHidden);
+            lrssi = std::to_string(RSSI);
+            lrssi = lrssi + "dB";
+            lchannel = std::to_string(channel);
+        #elif defined(ESP32)
+            ssid = espWiFi->SSID(i);
+            encryptionType = espWiFi->encryptionType(i);
+            RSSI = espWiFi->RSSI(i);
+            BSSID = espWiFi->BSSID(i);
+            channel = espWiFi->channel(i);
+            lrssi = String(String(RSSI) + "dB").c_str();
+            lchannel = String(channel).c_str();
+        #endif
             
         // ENC_TYPE_WEP  = 5,
         // ENC_TYPE_TKIP = 2,
@@ -888,28 +956,63 @@ String EspConfigWebserver::Construire_wifiscanhtml() // OK adapted
         wifiscanrows.replace("<!--%RSSI%-->", lrssi.c_str());
         wifiscanrows.replace("<!--%BSSID%-->", espWiFi->BSSIDstr(i).c_str());
         wifiscanrows.replace("<!--%CHANNEL%-->",lchannel.c_str());
-        
-        switch (encryptionType)
-        {
-        case ENC_TYPE_WEP:
-            wifiscanrows.replace("<!--%ENCRYPT%-->", "WEP");
-            break;
-        case ENC_TYPE_TKIP:
-            wifiscanrows.replace("<!--%ENCRYPT%-->", "TKIP");
-            break;
-        case ENC_TYPE_CCMP: 
-            wifiscanrows.replace("<!--%ENCRYPT%-->", "WPA2-CCMP");
-            break;
-        case ENC_TYPE_NONE:
-            wifiscanrows.replace("<!--%ENCRYPT%-->", "NONE");
-            break;
-        case ENC_TYPE_AUTO: 
-            wifiscanrows.replace("<!--%ENCRYPT%-->", "AUTO");
-            break;
-        default:    
-            wifiscanrows.replace("<!--%ENCRYPT%-->", "UNKNOWN");
-            break;
-        }
+        #ifdef ESP32
+            switch (encryptionType)
+            {
+            case WIFI_AUTH_WEP:
+                wifiscanrows.replace("<!--%ENCRYPT%-->", "WEP");
+                break;
+            case WIFI_AUTH_WPA_PSK:
+                wifiscanrows.replace("<!--%ENCRYPT%-->", "WPA/PSK");
+                break;
+            case WIFI_AUTH_WPA2_PSK: 
+                wifiscanrows.replace("<!--%ENCRYPT%-->", "WPA2/PSK");
+                break;
+            case WIFI_AUTH_OPEN:
+                wifiscanrows.replace("<!--%ENCRYPT%-->", "NONE");
+                break;
+            case WIFI_AUTH_WPA_WPA2_PSK: 
+                wifiscanrows.replace("<!--%ENCRYPT%-->", "WEPA/WPA2/PSK");
+                break;
+            case WIFI_AUTH_WPA2_ENTERPRISE: 
+                wifiscanrows.replace("<!--%ENCRYPT%-->", "WPA2/EAS");
+                break;
+            case WIFI_AUTH_WPA3_PSK: 
+                wifiscanrows.replace("<!--%ENCRYPT%-->", "WPA3/PSK");
+                break;
+            case WIFI_AUTH_WPA2_WPA3_PSK: 
+                wifiscanrows.replace("<!--%ENCRYPT%-->", "WPA2/WPA3/PSK");
+                break;
+            case WIFI_AUTH_WAPI_PSK:
+                wifiscanrows.replace("<!--%ENCRYPT%-->", "WAPI/PSK");
+                break;
+            default:    
+                wifiscanrows.replace("<!--%ENCRYPT%-->", "UNKNOWN");
+                break;
+            }
+        #elif defined(ESP8266)
+            switch (encryptionType)
+            {
+            case ENC_TYPE_WEP:
+                wifiscanrows.replace("<!--%ENCRYPT%-->", "WEP");
+                break;
+            case ENC_TYPE_TKIP:
+                wifiscanrows.replace("<!--%ENCRYPT%-->", "TKIP");
+                break;
+            case ENC_TYPE_CCMP: 
+                wifiscanrows.replace("<!--%ENCRYPT%-->", "WPA2-CCMP");
+                break;
+            case ENC_TYPE_NONE:
+                wifiscanrows.replace("<!--%ENCRYPT%-->", "NONE");
+                break;
+            case ENC_TYPE_AUTO: 
+                wifiscanrows.replace("<!--%ENCRYPT%-->", "AUTO");
+                break;
+            default:    
+                wifiscanrows.replace("<!--%ENCRYPT%-->", "UNKNOWN");
+                break;
+            }
+        #endif
             
 
     }
@@ -947,70 +1050,70 @@ String EspConfigWebserver::Construire_wificonfightml() // OK adapted
     String lstr;
     lstr = espConfig->getClientWiFiSSID().c_str();
     WiFiFormTemplatehtml.replace("<!--%STASSID%-->", lstr.c_str());
-    console->println("Construire_wifiConfig : remplace <!--%STASSID%-->");
+    _debug & _espconsoleactive ? _espconsole->println("Construire_wifiConfig : remplace <!--%STASSID%-->"):0;
     lstr = espConfig->getClientWiFiPassword().c_str();
     WiFiFormTemplatehtml.replace("<!--%STASSIDPW%-->", lstr.c_str());
-    console->println("Construire_wifiConfig : remplace <!--%STASSIDPW%-->");
+    _debug & _espconsoleactive ? _espconsole->println("Construire_wifiConfig : remplace <!--%STASSIDPW%-->"):0;
     WiFiFormTemplatehtml.replace("<!--%STAIP%-->", espConfig->getClientAdresse().toString());
-    console->println("Construire_wifiConfig : remplace <!--%STAIP%--> par " + espConfig->getClientAdresse().toString());
+    _debug & _espconsoleactive ? _espconsole->println("Construire_wifiConfig : remplace <!--%STAIP%--> par " + espConfig->getClientAdresse().toString()):0;
     WiFiFormTemplatehtml.replace("<!--%STASUBNET%-->", espConfig->getClientSubnet().toString());
-    console->println("Construire_wifiConfig : remplace <!--%STASUBNET%--> par " + espConfig->getClientSubnet().toString());  
+    _debug & _espconsoleactive ? _espconsole->println("Construire_wifiConfig : remplace <!--%STASUBNET%--> par " + espConfig->getClientSubnet().toString()):0;  
     WiFiFormTemplatehtml.replace("<!--%STAGATEWAY%-->", espConfig->getClientGateway().toString());
-    console->println("Construire_wifiConfig : remplace <!--%STAGATEWAY%--> par " + espConfig->getClientGateway().toString());
+    _debug & _espconsoleactive ? _espconsole->println("Construire_wifiConfig : remplace <!--%STAGATEWAY%--> par " + espConfig->getClientGateway().toString()):0;
     WiFiFormTemplatehtml.replace("<!--%STADNS%-->", espConfig->getClientDNS().toString());
-    console->println("Construire_wifiConfig : remplace <!--%STADNS%--> par " + espConfig->getClientDNS().toString());
+    _debug & _espconsoleactive ? _espconsole->println("Construire_wifiConfig : remplace <!--%STADNS%--> par " + espConfig->getClientDNS().toString()):0;
 
     if(espConfig->getClientWiFiToActivate()){
     WiFiFormTemplatehtml.replace("<!--%STASTATUS%-->", "checked value=\"active\"");
-    console->println("Construire_wifiConfig : remplace <!--%STASTATUS%--> par checked value=\"active\"");
+    _debug & _espconsoleactive ? _espconsole->println("Construire_wifiConfig : remplace <!--%STASTATUS%--> par checked value=\"active\""):0;
     }
     else {
     WiFiFormTemplatehtml.replace("<!--%STASTATUS%-->", "bobo value=\"active\"");
-    console->println("Construire_wifiConfig : remplace <!--%STASTATUS%--> par bobo value=\"active\"");
+    _debug & _espconsoleactive ? _espconsole->println("Construire_wifiConfig : remplace <!--%STASTATUS%--> par bobo value=\"active\""):0;
     }
 
 
     if (!espConfig->getClientWiFiManualIP()){
     WiFiFormTemplatehtml.replace("<!--%STADHCP%-->", "checked value=\"checked\"");
-    console->println("Construire_wifiConfig : remplace <!--%STADHCP%--> par checked value=\"checked\"");
+    _debug & _espconsoleactive ? _espconsole->println("Construire_wifiConfig : remplace <!--%STADHCP%--> par checked value=\"checked\""):0;
     }
     else {
     WiFiFormTemplatehtml.replace("<!--%STADHCP%-->", "bobo value=\"checked\"");
-    console->println("Construire_wifiConfig : remplace <!--%STADHCP%--> par bobo value=\"checked\"");
+    _debug & _espconsoleactive ? _espconsole->println("Construire_wifiConfig : remplace <!--%STADHCP%--> par bobo value=\"checked\""):0;
     }
 
 
     lstr=espConfig->getAccesspointWiFiSSID().c_str();
     WiFiFormTemplatehtml.replace("<!--%APSSID%-->", lstr.c_str());
-    console->println("Construire_wifiConfig : remplace <!--%APSSID%-->");
+    _debug & _espconsoleactive ? _espconsole->println("Construire_wifiConfig : remplace <!--%APSSID%-->"):0;
     lstr=espConfig->getAccesspointWiFiPassword().c_str();
     WiFiFormTemplatehtml.replace("<!--%APSSIDPW%-->", lstr.c_str());
-    console->println("Construire_wifiConfig : remplace <!--%APSSIDPW%-->"); 
+    _debug & _espconsoleactive ? _espconsole->println("Construire_wifiConfig : remplace <!--%APSSIDPW%-->"):0; 
     if (espConfig->getAccesspointWiFiToActivate()){
     WiFiFormTemplatehtml.replace("<!--%APSTATUS%-->", "checked value=\"active\"");
-    console->println("Construire_wifiConfig : remplace <!--%APSTATUS%--> par checked value=\"active\"");
+    _debug & _espconsoleactive ? _espconsole->println("Construire_wifiConfig : remplace <!--%APSTATUS%--> par checked value=\"active\""):0;
     }
     else {
     WiFiFormTemplatehtml.replace("<!--%APSTATUS%-->", "bobo value=\"active\"");
-    console->println("Construire_wifiConfig : remplace <!--%APSTATUS%--> par bobo value=\"active\"");
+    _debug & _espconsoleactive ? _espconsole->println("Construire_wifiConfig : remplace <!--%APSTATUS%--> par bobo value=\"active\""):0;
 
     }
     if (!espConfig->getAccesspointWiFiManualIP()){
     WiFiFormTemplatehtml.replace("<!--%APCDEFAUT%-->", "checked value=\"checked\"");
-    console->println("Construire_wifiConfig : remplace <!--%APCDEFAUT%--> par checked value=\"checked\"");
+    _debug & _espconsoleactive ? _espconsole->println("Construire_wifiConfig : remplace <!--%APCDEFAUT%--> par checked value=\"checked\""):0;
     }
     else {
     WiFiFormTemplatehtml.replace("<!--%APCDEFAUT%-->", "bobo value=\"checked\"");
-    console->println("Construire_wifiConfig : remplace <!--%APCDEFAUT%--> par bobo value=\"checked\"");
+    _debug & _espconsoleactive ? _espconsole->println("Construire_wifiConfig : remplace <!--%APCDEFAUT%--> par bobo value=\"checked\""):0;
     }
     WiFiFormTemplatehtml.replace("<!--%APIP%-->", espConfig->getAccesspointAdresse().toString());
-    console->println("Construire_wifiConfig : remplace <!--%APIP%--> par " + espConfig->getAccesspointAdresse().toString()); 
+    _debug & _espconsoleactive ? _espconsole->println("Construire_wifiConfig : remplace <!--%APIP%--> par " + espConfig->getAccesspointAdresse().toString()):0; 
     WiFiFormTemplatehtml.replace("<!--%APSUBNET%-->", espConfig->getAccesspointSubnet().toString());
-    console->println("Construire_wifiConfig : remplace <!--%APSUBNET%--> par " + espConfig->getAccesspointSubnet().toString());
+    _debug & _espconsoleactive ? _espconsole->println("Construire_wifiConfig : remplace <!--%APSUBNET%--> par " + espConfig->getAccesspointSubnet().toString()):0;
     WiFiFormTemplatehtml.replace("<!--%APGATEWAY%-->", espConfig->getAccesspointGateway().toString());
-    console->println("Construire_wifiConfig : remplace <!--%APGATEWAY%--> par " + espConfig->getAccesspointGateway().toString());
+    _debug & _espconsoleactive ? _espconsole->println("Construire_wifiConfig : remplace <!--%APGATEWAY%--> par " + espConfig->getAccesspointGateway().toString()):0;
     WiFiFormTemplatehtml.replace("<!--%APDNS%-->", espConfig->getAccesspointDNS().toString());
-    console->println("Construire_wifiConfig : remplace <!--%APDNS%--> par " + espConfig->getAccesspointDNS().toString());
+    _debug & _espconsoleactive ? _espconsole->println("Construire_wifiConfig : remplace <!--%APDNS%--> par " + espConfig->getAccesspointDNS().toString()):0;
     
     String page = Construire_header(topic::WiFi);
     page += Construire_wifiheader(subtopic::Config);
