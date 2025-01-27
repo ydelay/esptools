@@ -4,7 +4,12 @@
 #include <U8g2lib.h>
 
 
-using  D_CLASS = U8G2_SSD1306_128X64_NONAME_F_SW_I2C;
+#ifdef ESP8266
+    using  D_CLASS = U8G2_SSD1306_128X64_NONAME_F_SW_I2C;
+#endif
+#ifdef ESP32
+    using  D_CLASS = U8G2_SSD1306_128X64_NONAME_F_HW_I2C;
+#endif
 
 const uint8_t page_1 = 0;
 const uint8_t page_2 = 1;
@@ -57,6 +62,7 @@ public:
 
     EspDisplay(const u8g2_cb_t *rotation, uint8_t clock, uint8_t data, uint8_t reset = U8X8_PIN_NONE);   
     void begin();
+    void begin(uint8_t adress);
     void setFont(const uint8_t *font);
     void setCurrentPage(page_t page);
     void println(page_t page, ligne_t ligne, String text);

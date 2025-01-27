@@ -63,6 +63,17 @@ void EspDisplay::begin(){
     clearpage(page_4);
 }
 
+void EspDisplay::begin(uint8_t adress)
+{
+    D_CLASS::setI2CAddress(adress);
+    D_CLASS::setFont(FontByDefault);
+    D_CLASS::clearBuffer();
+    clearpage(page_1);
+    clearpage(page_2);
+    clearpage(page_3);
+    clearpage(page_4);
+}
+
 void EspDisplay::setFont(const uint8_t *font){
     D_CLASS::setFont(font);
 }
