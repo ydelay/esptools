@@ -90,7 +90,7 @@ void setup()
     espWiFi = new EspWiFiManager();
     WebServer = new EspConfigWebserver();
     espClient = new WiFiClient();
-
+//    espConsole->begin();
     #ifdef ESPDISPLAY
         #ifdef ESP32
             espDisplay = new EspDisplay(U8G2_R0,U8X8_PIN_NONE, PIN_OLED_CLOCK, PIN_OLED_DATA);
@@ -101,6 +101,7 @@ void setup()
     #endif // ESPDISPLAY
 
     // Initialisation des objets
+    espConsole->println("Initialisation des objets");
     espConfig->setConsole(espConsole);
     espWiFi->setconfig(espConfig);
     espWiFi->setconsole(espConsole);
@@ -113,6 +114,7 @@ void setup()
 
     // Initialisation de l'affichage
     #ifdef ESPDISPLAY
+        espConsole->println("Initialisation de l'affichage");
         espDisplay->begin();
         espDisplay->setln(pageinfo, ligne_1, "WiFi Disconnected");
         espDisplay->setln(pageinfo, ligne_2, espConfig->getDeviceName().c_str());
@@ -126,6 +128,7 @@ void setup()
         espDisplay->setln(pagesensor2,ligne_3, "SENSOR 2 ON");
 
         espDisplay->setrotateTime(DisplayRotateInterval);
+        espConsole->println("Fin d'initialisation de l'affichage");
 
     #endif // ESPDISPLAY
 
@@ -137,9 +140,11 @@ void setup()
     #endif // ESP8266
 
     #ifdef ESP32
+        espConsole->println("Configuration des Event Handler WiFi");
         WiFi.onEvent(onClientConnect, WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_CONNECTED);
         WiFi.onEvent(onClientDisconnect, WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_DISCONNECTED);
         WiFi.onEvent(onClientGotIP, WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_GOT_IP);
+        espConsole->println("Fin de configuration des Event Handler WiFi");
     #endif // ESP32
 
     // Configuration du WiFi
@@ -156,6 +161,7 @@ void setup()
     {
         ArduinoOTA.setPassword(espConfig->getOTAPassword().c_str());
     }
+    delay(1000);
 }
 
 
@@ -164,14 +170,14 @@ void loop()
 {
   long now = millis();
   WebServer->handleClient();
-  if (espConfig->getOTAEnable())
-    {
-      ArduinoOTA.begin();
-      ArduinoOTA.handle();
-    } 
 
   if (espWiFi->isConnected())
     {
+    if (espConfig->getOTAEnable())
+        {
+        ArduinoOTA.begin();
+        ArduinoOTA.handle();
+        } 
     #ifdef ESPDISPLAY
         espDisplay->setln(pageinfo, ligne_1, "Wifi Connected");
         espDisplay->setln(pagewifi, ligne_1, "Wifi Connected");
@@ -227,23 +233,23 @@ void loop()
 #ifdef ESP32
     void onClientConnect(WiFiEvent_t event, WiFiEventInfo_t info) 
     {
-        espConsole->println("onConnect : Wifi Connected");
+        // espConsole->println("onConnect : Wifi Connected");
         WifiConnected = true;
     }
     void onClientDisconnect(WiFiEvent_t event, WiFiEventInfo_t info) 
     {
         // Cette fonction gère les évenement de déconection
-        espConsole->println("onDisconnect 153 : Wifi Disconnected");
+        // espConsole->println("onDisconnect 153 : Wifi Disconnected");
         WifiConnected = false;
     }
     void onClientGotIP(WiFiEvent_t event, WiFiEventInfo_t info) 
     {
         // Cette fonction gère les événement d'acquisition de l'adresse IP
-        espConsole->println("onGotIP 159 : Wifi GotIP");
         #ifdef ESPDISPLAY
-            displayWiFiconnectionInfo(WiFi.isConnected());
+           displayWiFiconnectionInfo(WiFi.isConnected());
         #endif // ESPDISPLAY
         espConsole->begin();
+        espConsole->println("onGotIP 159 : Wifi GotIP");
         espConsole->println("");
     }
 #endif // ESP32

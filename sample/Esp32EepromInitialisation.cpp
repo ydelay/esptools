@@ -144,7 +144,7 @@ void loop()
 
   }
   espWebserver->handleClient();
-  debug ? Serial.print(".");
+debug ? Serial.print(".") : 0;
 }
 
 // ------- Core des fonctions déclarées  -----------------------------------------------------------
